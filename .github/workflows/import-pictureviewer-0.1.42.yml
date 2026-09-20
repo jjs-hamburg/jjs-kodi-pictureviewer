@@ -1,0 +1,66 @@
+name: "Import JJS Picture Viewer 0.1.42"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "script.jjs.pictureviewer-0.1.42*.zip"
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Locate and verify source ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP="$(find . -maxdepth 1 -type f -name 'script.jjs.pictureviewer-0.1.42*.zip' -print -quit)"
+          if [ -z "$ZIP" ]; then
+            echo "Source ZIP not found."
+            exit 1
+          fi
+          echo "SOURCE_ZIP=$ZIP" >> "$GITHUB_ENV"
+          echo "4f074ea63cc002fa48dccd21e9c589f48d98e54bb3019b573db4007cff37b529  $ZIP" | sha256sum -c -
+
+      - name: Extract exact 0.1.42 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf script.jjs.pictureviewer
+          unzip -q "$SOURCE_ZIP"
+
+          test -f script.jjs.pictureviewer/addon.xml
+          test -f script.jjs.pictureviewer/default.py
+          test -f script.jjs.pictureviewer/resources/lib/viewer.py
+          test -f script.jjs.pictureviewer/resources/skins/Default/1080i/PictureViewer.xml
+          test -f script.jjs.pictureviewer/resources/skins/Default/media/Textures.xbt
+
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("script.jjs.pictureviewer/addon.xml").getroot()
+          assert root.attrib["id"] == "script.jjs.pictureviewer", root.attrib
+          assert root.attrib["version"] == "0.1.42", root.attrib
+          print("Verified:", root.attrib["id"], root.attrib["version"])
+          PY
+
+      - name: Commit imported source
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f "$SOURCE_ZIP"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A script.jjs.pictureviewer "$SOURCE_ZIP"
+          git commit -m "Import JJS Picture Viewer 0.1.42 source"
+          git push
