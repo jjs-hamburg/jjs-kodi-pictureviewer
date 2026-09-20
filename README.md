@@ -1,8 +1,8 @@
-# JJS Picture Viewer
+# JJS Kodi Picture Viewer
 
 **Aktueller Referenzstand: 0.1.42**
 
-JJS Picture Viewer ist ein schneller, fernbedienungstauglicher Bildbetrachter für Kodi. Er benutzt zum Browsen weiterhin Kodis normales **Bilder-Fenster**, öffnet ein ausgewähltes Bild aber in einem eigenen Viewer. Dadurch wird nicht Kodis native Slideshow gestartet und der Ordner wird beim Öffnen eines Bildes nicht komplett vorgeladen.
+JJS Kodi Picture Viewer ist ein schneller, fernbedienungstauglicher Bildbetrachter für Kodi. Er benutzt zum Browsen weiterhin Kodis normales **Bilder-Fenster**, öffnet ein ausgewähltes Bild aber in einem eigenen Viewer. Dadurch wird nicht Kodis native Slideshow gestartet und der Ordner wird beim Öffnen eines Bildes nicht komplett vorgeladen.
 
 Der Viewer ist auf große Bildordner und Netzwerkquellen ausgelegt, zeigt immer nur das aktuelle Bild an und kann optional genau **ein Folgebild vorladen**. Galerie- und Vollbilddarstellung, Diashow, Hintergrund, weißer Rand, Schatten und mehrere Übergänge lassen sich direkt im linken Seitenmenü einstellen.
 
@@ -19,7 +19,7 @@ Das Add-on benötigt Kodi mit Python 3 (`xbmc.python >= 3.0.0`) und das Kodi-Mod
 
 ## Start und Bildauswahl
 
-Beim normalen Start aktiviert JJS Picture Viewer Kodis originales **Bilder-Fenster** und stellt dort eine JJS-Bildquelle bereit. Die oberste Ebene zeigt die in Kodi eingerichteten Bildquellen. Ordner und Bilder werden im normalen Kodi-Bilderbrowser angezeigt und können wie gewohnt mit der eingestellten Ansicht und dem Kodi-Seitenmenü durchsucht werden.
+Beim normalen Start aktiviert JJS Kodi Picture Viewer Kodis originales **Bilder-Fenster** und stellt dort eine JJS-Bildquelle bereit. Die oberste Ebene zeigt die in Kodi eingerichteten Bildquellen. Ordner und Bilder werden im normalen Kodi-Bilderbrowser angezeigt und können wie gewohnt mit der eingestellten Ansicht und dem Kodi-Seitenmenü durchsucht werden.
 
 Ein Klick auf ein Bild startet direkt den JJS Viewer. Kodis natives Slideshow-Fenster wird dabei nicht geöffnet.
 
@@ -42,9 +42,6 @@ Beim Verlassen des Viewers wird der Cursor im Kodi-Bilderfenster auf das **zulet
 | **OK / Select** | Linkes Seitenmenü öffnen |
 | **Context Menu** | Linkes Seitenmenü öffnen; bei geöffnetem Menü wieder schließen |
 | **Back / Zurück** | Viewer schließen und in die Kodi-Bilderliste zurückkehren |
-| **Play/Pause** | Wie Hoch: Start → Pause → Fortsetzen |
-| **Pause** | Laufende Diashow pausieren bzw. fortsetzen; bei gestoppter Diashow ohne Wirkung |
-| **Stop** | Diashow stoppen |
 
 Links und Rechts bewegen sich immer um **genau ein Bild**. Die Navigation ist zirkulär: hinter dem letzten Bild folgt wieder das erste und vor dem ersten das letzte.
 
@@ -129,12 +126,15 @@ Der Diaprojektor-Effekt verwendet getrennte Bild- und Ghost-Layer für ein stabi
 
 ## Musik und Media-Tasten
 
-JJS Picture Viewer trennt Bild- und Audio-Steuerung bewusst:
+Die vorgesehene Bedienung der Diashow erfolgt **ausschließlich mit Hoch/Runter**:
 
-- **Im normalen Kodi-Bilderfenster** steuern Play/Pause/Stop ausschließlich einen bereits laufenden Audioplayer. Wenn keine Musik läuft, passiert nichts. Ein markiertes Bild wird dadurch niemals als generisches Playable gestartet.
-- **Im JJS Viewer** steuern dieselben Media-Tasten ausschließlich die Diashow. Sie werden nicht an den Audioplayer weitergereicht; laufende Musik bleibt daher unbeeinflusst.
+- **Hoch**: Diashow starten, pausieren oder fortsetzen.
+- **Runter**: Diashow stoppen.
+- **Links/Rechts**: manuell genau ein Bild zurück bzw. vor.
 
-Dafür installiert das Add-on eine dauerhafte Pictures-Keymap und während des geöffneten Viewer-Dialogs zusätzlich eine temporäre, exakt an dessen Window-ID gebundene Keymap. Die temporäre Keymap wird beim Schließen wieder entfernt; eine nach einem Absturz übrig gebliebene Viewer-Keymap wird beim nächsten Start bereinigt.
+**Play/Pause und Stop gehören nicht zur dokumentierten Viewer-Bedienung**, weil diese Tasten mit der Musikwiedergabe kollidieren können.
+
+Der importierte Referenzstand 0.1.42 enthält intern noch Media-Key-Abfanglogik aus den Versionen 0.1.28/0.1.29. Diese Logik trennt das Kodi-Bilderfenster, den JJS-Viewer und einen bereits laufenden Audioplayer voneinander. Für die Bedienung des Viewers soll man sich dennoch ausschließlich an Hoch/Runter sowie Links/Rechts halten.
 
 ## Performance und Stabilität
 
