@@ -1,3 +1,9 @@
+JJS Kodi Picture Viewer 0.1.43
+- Sichtbarer Add-on-Name auf "JJS Kodi Picture Viewer" vereinheitlicht; Add-on-ID script.jjs.pictureviewer bleibt unveraendert.
+- Play/Pause/Stop werden vom Picture Viewer nicht mehr abgefangen. Die Diashow wird ausschliesslich mit Hoch (Start/Pause/Fortsetzen) und Runter (Stop) gesteuert, damit Media-Tasten der normalen Kodi-Musikwiedergabe gehoeren.
+- Beim ersten Start nach dem Update werden die von 0.1.28-0.1.42 angelegten JJS-Media-Keymaps zz_jjs_pictureviewer.xml und zzz_jjs_pictureviewer_active.xml geloescht und Kodis Keymaps neu geladen.
+- Rendering, Prefetch, Uebergaenge und der 0.1.42-Deadlock-Fix bleiben unveraendert.
+
 JJS Picture Viewer 0.1.42
 - Deadlock-Fix fuer sporadisch dauerhaft leere Bildflaechen: Die Diaprojektor-Bereinigung fuehrt keine synchronen SetProperty(..., wait=True)-Aufrufe mehr aus dem Timerthread aus. Der Hintergrundthread stellt nur noch eine interne GUI-Action zu; JJSPhotoLayer/JJSProjectorActive/JJSTransitionMode werden anschliessend im normalen WindowXML-onAction-Thread bereinigt. Eine Transition-Seriennummer verhindert, dass eine verspätete Cleanup-Action eine neuere Animation beendet.
 - Die in 0.1.41 verwendeten normalen Texture-Loader fuer die vier dynamischen Foto-/Projektor-Flaechen bleiben unveraendert.

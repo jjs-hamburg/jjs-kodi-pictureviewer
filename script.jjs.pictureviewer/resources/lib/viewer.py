@@ -29,84 +29,18 @@ TEMP_DIR = xbmcvfs.translatePath('special://temp/')
 SHADOW_TEXTURE = os.path.join(ADDON_PATH, 'resources', 'skins', 'Default', 'media', 'shadow.png')
 DEFAULT_BACKGROUND_IMAGE = os.path.join(ADDON_PATH, 'resources', 'media', 'defaultBackground.jpg')
 
-# Media-key separation.
-#
-# Kodi's Pictures window and our WindowXMLDialog are two different input
-# contexts. Keep them completely separate:
-#   * Pictures list: Play/Pause/Stop are routed through this add-on and may
-#     control an already-active AUDIO player only. A selected picture is never
-#     played by the generic Kodi player.
-#   * JJS viewer dialog: a temporary keymap is installed for the exact runtime
-#     dialog id. Media buttons are translated to harmless Number0/1/2 actions;
-#     onAction() consumes those as slideshow commands. No PlayPause/Pause/Stop
-#     player action exists in this dialog context, so background music cannot be
-#     affected by the viewer controls.
-PICTURES_KEYMAP_FILE = 'zz_jjs_pictureviewer.xml'
-VIEWER_KEYMAP_FILE = 'zzz_jjs_pictureviewer_active.xml'
-
-PICTURES_KEYMAP_XML = """<?xml version="1.0" encoding="UTF-8"?>
-<keymap>
-  <pictures>
-    <keyboard>
-      <play_pause>RunScript(script.jjs.pictureviewer,remote_playpause)</play_pause>
-      <play>RunScript(script.jjs.pictureviewer,remote_playpause)</play>
-      <pause>RunScript(script.jjs.pictureviewer,remote_pause)</pause>
-      <stop>RunScript(script.jjs.pictureviewer,remote_stop)</stop>
-    </keyboard>
-    <remote>
-      <play>RunScript(script.jjs.pictureviewer,remote_playpause)</play>
-      <pause>RunScript(script.jjs.pictureviewer,remote_pause)</pause>
-      <stop>RunScript(script.jjs.pictureviewer,remote_stop)</stop>
-    </remote>
-  </pictures>
-</keymap>
-"""
-
-
-def _viewer_keymap_xml(dialog_id):
-    wid = int(dialog_id)
-    return """<?xml version="1.0" encoding="UTF-8"?>
-<keymap>
-  <window%d>
-    <keyboard>
-      <play_pause>Number0</play_pause>
-      <play>Number0</play>
-      <pause>Number1</pause>
-      <stop>Number2</stop>
-    </keyboard>
-    <remote>
-      <play>Number0</play>
-      <pause>Number1</pause>
-      <stop>Number2</stop>
-    </remote>
-  </window%d>
-</keymap>
-""" % (wid, wid)
+# 0.1.43: Play/Pause/Stop are deliberately NOT owned by the picture viewer.
+# Slideshow control is Up/Down only, so Kodi's media keys remain available for
+# normal audio playback. Older 0.1.28-0.1.42 releases installed two JJS keymaps;
+# remove those once on upgrade so no stale mapping can keep intercepting keys.
+LEGACY_MEDIA_KEYMAP_FILES = (
+    'zz_jjs_pictureviewer.xml',
+    'zzz_jjs_pictureviewer_active.xml',
+)
 
 
 def _keymap_path(filename):
     return 'special://profile/keymaps/' + filename
-
-
-def _write_keymap(filename, content):
-    keymap_dir = 'special://profile/keymaps/'
-    path = _keymap_path(filename)
-    xbmcvfs.mkdirs(keymap_dir)
-    current = ''
-    if xbmcvfs.exists(path):
-        fh = xbmcvfs.File(path, 'r')
-        try:
-            current = fh.read() or ''
-        finally:
-            fh.close()
-    if current == content:
-        return False
-    fh = xbmcvfs.File(path, 'w')
-    try:
-        fh.write(content)
-    finally:
-        fh.close()
-    return True
 
 
 def _delete_keymap(filename):
@@ -119,53 +53,18 @@ def _delete_keymap(filename):
         return False
 
 
-def _reload_keymaps():
-    xbmc.executebuiltin('ReloadKeymaps')
-
-
-def _ensure_pictures_audio_keymap():
-    try:
-        if _write_keymap(PICTURES_KEYMAP_FILE, PICTURES_KEYMAP_XML):
-            _reload_keymaps()
-            _log('Pictures-Keymap fuer Audio Play/Pause installiert/aktualisiert')
-    except Exception as exc:
-        _log('Pictures-Keymap konnte nicht installiert werden: %r' % (exc,), xbmc.LOGWARNING)
-
-
-def _install_viewer_media_keymap():
-    """Install an exact-window override for the currently active JJS dialog."""
-    try:
-        dialog_id = int(xbmcgui.getCurrentWindowDialogId())
-        if dialog_id <= 0:
-            _log('Viewer-Keymap: keine gueltige Dialog-ID', xbmc.LOGWARNING)
-            return 0
-        content = _viewer_keymap_xml(dialog_id)
-        _write_keymap(VIEWER_KEYMAP_FILE, content)
-        _reload_keymaps()
-        _log('Viewer-Keymap aktiv fuer Dialog %d' % dialog_id)
-        return dialog_id
-    except Exception as exc:
-        _log('Viewer-Keymap konnte nicht installiert werden: %r' % (exc,), xbmc.LOGWARNING)
-        return 0
-
-
-def _remove_viewer_media_keymap():
-    try:
-        if _delete_keymap(VIEWER_KEYMAP_FILE):
-            _reload_keymaps()
-            _log('Viewer-Keymap entfernt')
-    except Exception as exc:
-        _log('Viewer-Keymap konnte nicht entfernt werden: %r' % (exc,), xbmc.LOGWARNING)
-
-
-def _cleanup_stale_viewer_keymap():
-    """Remove a leftover dialog keymap after a previous Kodi/add-on crash."""
-    try:
-        if _delete_keymap(VIEWER_KEYMAP_FILE):
-            _reload_keymaps()
-            _log('Verwaiste Viewer-Keymap entfernt')
-    except Exception:
-        pass
+def _cleanup_legacy_media_keymaps():
+    changed = False
+    for filename in LEGACY_MEDIA_KEYMAP_FILES:
+        try:
+            if _delete_keymap(filename):
+                changed = True
+                _log('Alte Media-Keymap entfernt: %s' % filename)
+        except Exception as exc:
+            _log('Alte Media-Keymap konnte nicht entfernt werden %s: %r' %
+                 (filename, exc), xbmc.LOGWARNING)
+    if changed:
+        xbmc.executebuiltin('ReloadKeymaps')
 
 IMAGE_EXTENSIONS = {
     '.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif', '.tif', '.tiff'
@@ -250,17 +149,9 @@ ACTION_SELECT_ITEM = 7
 ACTION_PARENT_DIR = 9
 ACTION_PREVIOUS_MENU = 10
 ACTION_SHOW_INFO = 11
-ACTION_PAUSE = 12
-ACTION_STOP = 13
 ACTION_NAV_BACK = 92
 ACTION_CONTEXT_MENU = 117
-ACTION_PLAYER_PLAY = 79
-ACTION_PLAYER_PLAYPAUSE = 229
-# Harmless viewer-only actions used by the temporary dialog keymap.
-ACTION_JJS_PLAYPAUSE = 58  # Number0 / REMOTE_0
-ACTION_JJS_PAUSE = 59      # Number1 / REMOTE_1
-ACTION_JJS_STOP = 60       # Number2 / REMOTE_2
-# Internal GUI-thread handoff used by the slideshow timer.  The timer must never
+# Internal GUI-thread handoff used by the slideshow timer. The timer must never
 # call WindowXML properties synchronously from its worker thread.
 ACTION_JJS_SETTLE = 61     # Number3 / REMOTE_3
 ACTION_NEXT_PICTURE = 28
@@ -1041,7 +932,6 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.transition_settle_queued_serial = 0
         self.transition_settle_queued_at = 0.0
         self.play_indicator_until = 0.0
-        self.viewer_keymap_dialog_id = 0
 
     def onInit(self):
         self.bg_black = self.getControl(CTRL_BG_BLACK)
@@ -1061,9 +951,6 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.setProperty('JJSTransitionDir', 'next')
         self.setProperty('JJSTransitionMs', str(int(self.settings.get('transition_duration_ms', 350))))
         self.setFocusId(CTRL_DUMMY_FOCUS)
-        # Exact-dialog media-key override: Kodi never creates player actions
-        # for Play/Pause/Stop while this viewer is active.
-        self.viewer_keymap_dialog_id = _install_viewer_media_keymap()
         self.ready = True
         self._refresh_menu_labels()
         if self._show_current(allow_prefetch=False, animate=False):
@@ -1094,8 +981,6 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.slideshow_active = False
         self.slideshow_paused = False
         self.play_indicator_until = 0.0
-        _remove_viewer_media_keymap()
-        self.viewer_keymap_dialog_id = 0
         try:
             self.clearProperty('JJSPhotoLayer')
             self.clearProperty('JJSProjectorActive')
@@ -1969,35 +1854,6 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             self.shutdown()
             self.close()
             return
-        # Viewer-only surrogate actions from the exact-dialog keymap.
-        # These are number actions, never Kodi player actions.
-        if action_id == ACTION_JJS_PLAYPAUSE:
-            self._playpause_slideshow()
-            return
-        if action_id == ACTION_JJS_PAUSE:
-            self._pause_slideshow()
-            return
-        if action_id == ACTION_JJS_STOP:
-            self._stop_slideshow()
-            return
-
-        # Fallback only if the exact-dialog keymap could not be installed.
-        if action_id == ACTION_PLAYER_PLAY:
-            if not self.viewer_keymap_dialog_id:
-                self._start_slideshow()
-            return
-        if action_id == ACTION_PLAYER_PLAYPAUSE:
-            if not self.viewer_keymap_dialog_id:
-                self._playpause_slideshow()
-            return
-        if action_id == ACTION_PAUSE:
-            if not self.viewer_keymap_dialog_id:
-                self._pause_slideshow()
-            return
-        if action_id == ACTION_STOP:
-            if not self.viewer_keymap_dialog_id:
-                self._stop_slideshow()
-            return
         if action_id == ACTION_NEXT_PICTURE:
             # Slideshow timer steps use NextPicture, never Right.  If Stop or
             # Pause happened after the action was queued, swallow it here.
@@ -2274,57 +2130,9 @@ def show_image(selected_image):
         _cleanup_temp_files()
 
 
-def _active_audio_player_id():
-    response = _jsonrpc('Player.GetActivePlayers')
-    players = response.get('result') or []
-    for player in players:
-        try:
-            if player.get('type') == 'audio':
-                return int(player.get('playerid'))
-        except Exception:
-            continue
-    return None
-
-
-def _audio_playpause(mode='toggle'):
-    """Control only an already-active audio player; never start a list item."""
-    player_id = _active_audio_player_id()
-    if player_id is None:
-        return
-    play = 'toggle'
-    if mode == 'play':
-        play = True
-    elif mode == 'pause':
-        play = False
-    _jsonrpc('Player.PlayPause', {'playerid': player_id, 'play': play})
-
-
-def _audio_stop():
-    player_id = _active_audio_player_id()
-    if player_id is not None:
-        _jsonrpc('Player.Stop', {'playerid': player_id})
-
-
-def _relay_media_key(command):
-    """Pictures-list media keys: control only an already-active audio player."""
-    command = str(command or '').strip().lower()
-    if xbmcgui.getCurrentWindowId() != WINDOW_PICTURES:
-        return
-    if command == 'playpause':
-        _audio_playpause('toggle')
-    elif command == 'play':
-        _audio_playpause('play')
-    elif command == 'pause':
-        _audio_playpause('pause')
-    elif command == 'stop':
-        _audio_stop()
-
 
 def run_script():
     requested = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else ''
-    if requested.startswith('remote_'):
-        _relay_media_key(requested[7:])
-        return
     if requested and os.path.splitext(requested)[1].lower() in IMAGE_EXTENSIONS:
         show_image(requested)
         return
@@ -2335,10 +2143,7 @@ def run_script():
 
 
 def run():
-    requested = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else ''
-    if not str(requested).startswith('remote_'):
-        _cleanup_stale_viewer_keymap()
-    _ensure_pictures_audio_keymap()
+    _cleanup_legacy_media_keymaps()
     if sys.argv and str(sys.argv[0]).startswith('plugin://'):
         run_plugin()
     else:

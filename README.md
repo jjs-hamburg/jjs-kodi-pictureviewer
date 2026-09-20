@@ -1,6 +1,6 @@
 # JJS Kodi Picture Viewer
 
-**Aktueller Referenzstand: 0.1.42**
+**Aktueller Stand: 0.1.43**
 
 JJS Kodi Picture Viewer ist ein schneller, fernbedienungstauglicher Bildbetrachter für Kodi. Er benutzt zum Browsen weiterhin Kodis normales **Bilder-Fenster**, öffnet ein ausgewähltes Bild aber in einem eigenen Viewer. Dadurch wird nicht Kodis native Slideshow gestartet und der Ordner wird beim Öffnen eines Bildes nicht komplett vorgeladen.
 
@@ -132,9 +132,9 @@ Die vorgesehene Bedienung der Diashow erfolgt **ausschließlich mit Hoch/Runter*
 - **Runter**: Diashow stoppen.
 - **Links/Rechts**: manuell genau ein Bild zurück bzw. vor.
 
-**Play/Pause und Stop gehören nicht zur dokumentierten Viewer-Bedienung**, weil diese Tasten mit der Musikwiedergabe kollidieren können.
+**Play/Pause und Stop werden ab 0.1.43 vom Picture Viewer nicht mehr abgefangen.** Sie bleiben damit vollständig der normalen Kodi-Medien-/Musiksteuerung überlassen.
 
-Der importierte Referenzstand 0.1.42 enthält intern noch Media-Key-Abfanglogik aus den Versionen 0.1.28/0.1.29. Diese Logik trennt das Kodi-Bilderfenster, den JJS-Viewer und einen bereits laufenden Audioplayer voneinander. Für die Bedienung des Viewers soll man sich dennoch ausschließlich an Hoch/Runter sowie Links/Rechts halten.
+Beim ersten Start von 0.1.43 werden außerdem die von älteren Versionen angelegten JJS-Media-Keymaps automatisch entfernt und Kodis Keymaps neu geladen. Für die Bild- und Diashowsteuerung verwendet der Viewer ausschließlich Hoch/Runter sowie Links/Rechts.
 
 ## Performance und Stabilität
 
@@ -206,4 +206,4 @@ und enthält das direkt in Kodi installierbare ZIP:
 
 Die ursprüngliche, fortlaufend gepflegte technische Versionshistorie befindet sich unverändert in `script.jjs.pictureviewer/README.txt`.
 
-Der aktuelle Referenzstand dieses Repositories ist **0.1.42 – projector deadlock fix**.
+Der aktuelle Stand dieses Repositories ist **0.1.43 – Media-Tasten wieder vollständig Kodi/Musik überlassen; 0.1.42-Deadlock-Fix unverändert enthalten**.
