@@ -1,0 +1,95 @@
+name: "Build Kodi add-on ZIP"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "script.jjs.pictureviewer/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate add-on
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python -m py_compile             script.jjs.pictureviewer/default.py             script.jjs.pictureviewer/resources/lib/viewer.py
+
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse("script.jjs.pictureviewer/addon.xml").getroot()
+          addon_id = root.attrib["id"]
+          version = root.attrib["version"]
+
+          assert addon_id == "script.jjs.pictureviewer", addon_id
+          assert version, "Missing add-on version"
+
+          required = [
+              "script.jjs.pictureviewer/addon.xml",
+              "script.jjs.pictureviewer/default.py",
+              "script.jjs.pictureviewer/resources/lib/viewer.py",
+              "script.jjs.pictureviewer/resources/skins/Default/1080i/PictureViewer.xml",
+              "script.jjs.pictureviewer/resources/skins/Default/media/Textures.xbt",
+          ]
+          for item in required:
+              p = Path(item)
+              assert p.is_file() and p.stat().st_size > 0, f"Missing/empty: {item}"
+
+          ET.parse("script.jjs.pictureviewer/resources/skins/Default/1080i/PictureViewer.xml")
+          print(f"{addon_id} {version}")
+          Path("addon-version.txt").write_text(version, encoding="utf-8")
+          PY
+
+      - name: Build installable ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(cat addon-version.txt)"
+          ZIP="script.jjs.pictureviewer-${VERSION}.zip"
+
+          rm -rf script.jjs.pictureviewer/__pycache__                  script.jjs.pictureviewer/resources/lib/__pycache__
+
+          zip -qr "$ZIP" script.jjs.pictureviewer             -x "*/__pycache__/*" "*.pyc"
+
+          FIRST="$(unzip -Z1 "$ZIP" | head -n 1)"
+          case "$FIRST" in
+            script.jjs.pictureviewer/*) ;;
+            *)
+              echo "Unexpected ZIP root: $FIRST"
+              exit 1
+              ;;
+          esac
+
+          echo "ADDON_ZIP=$ZIP" >> "$GITHUB_ENV"
+          echo "ADDON_VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Show SHA256
+        shell: bash
+        run: sha256sum "$ADDON_ZIP"
+
+      - name: Upload add-on ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: script.jjs.pictureviewer-${{ env.ADDON_VERSION }}
+          path: ${{ env.ADDON_ZIP }}
+          if-no-files-found: error
+          retention-days: 90
