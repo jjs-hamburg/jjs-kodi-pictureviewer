@@ -2,6 +2,11 @@ name: "Build Kodi add-on ZIP"
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "Import JJS Picture Viewer 0.1.42"
+    types:
+      - completed
   push:
     branches:
       - main
@@ -13,6 +18,7 @@ permissions:
 
 jobs:
   build:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
