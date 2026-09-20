@@ -12,9 +12,10 @@ on:
       - main
     paths:
       - "script.jjs.pictureviewer/**"
+      - ".github/workflows/build-addon.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -92,10 +93,26 @@ jobs:
         shell: bash
         run: sha256sum "$ADDON_ZIP"
 
-      - name: Upload add-on ZIP
+      - name: Upload add-on ZIP artifact
         uses: actions/upload-artifact@v4
         with:
           name: script.jjs.pictureviewer-${{ env.ADDON_VERSION }}
           path: ${{ env.ADDON_ZIP }}
           if-no-files-found: error
           retention-days: 90
+
+      - name: Publish direct-install GitHub Release
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="v${ADDON_VERSION}"
+          TITLE="JJS Kodi Picture Viewer ${ADDON_VERSION}"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ADDON_ZIP" --clobber
+          else
+            gh release create "$TAG" "$ADDON_ZIP"               --title "$TITLE"               --notes "Direct-install Kodi add-on ZIP. Download script.jjs.pictureviewer-${ADDON_VERSION}.zip and install it in Kodi via Add-ons -> Install from zip file."
+          fi
