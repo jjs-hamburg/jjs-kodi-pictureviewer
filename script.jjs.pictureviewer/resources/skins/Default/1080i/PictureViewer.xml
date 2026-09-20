@@ -1,0 +1,676 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<window type="dialog">
+    <defaultcontrol always="true">9900</defaultcontrol>
+    <controls>
+        <control type="image" id="1001">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <texture colordiffuse="FF000000">white.png</texture>
+        </control>
+        <control type="image" id="1002">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>scale</aspectratio>
+            <texture background="true"/>
+        </control>
+        <control type="image" id="1003">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <visible>false</visible>
+            <texture border="70">shadow.png</texture>
+        </control>
+        <control type="image" id="1004">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <visible>false</visible>
+            <texture>white.png</texture>
+        </control>
+        <control type="image" id="1005">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>stretch</aspectratio>
+            <texture/>
+            <visible>String.IsEqual(Window.Property(JJSPhotoLayer),A)+String.IsEqual(Window.Property(JJSProjectorActive),0)</visible>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="fade" start="0" end="100" time="120" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="fade" start="0" end="100" time="120" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="120" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="fade" start="15" end="100" time="120" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="120" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="fade" start="15" end="100" time="120" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="120" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="fade" start="0" end="100" time="180" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="fade" start="0" end="100" time="180" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="180" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="fade" start="15" end="100" time="180" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="180" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="fade" start="15" end="100" time="180" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="180" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="fade" start="0" end="100" time="250" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="fade" start="0" end="100" time="250" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="250" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="fade" start="15" end="100" time="250" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="250" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="fade" start="15" end="100" time="250" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="250" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="fade" start="0" end="100" time="350" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="fade" start="0" end="100" time="350" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="350" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="fade" start="15" end="100" time="350" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="350" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="fade" start="15" end="100" time="350" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="350" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="fade" start="0" end="100" time="500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="fade" start="0" end="100" time="500" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="500" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="fade" start="15" end="100" time="500" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="500" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="fade" start="15" end="100" time="500" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="500" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="fade" start="0" end="100" time="700" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="fade" start="0" end="100" time="700" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="700" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="fade" start="15" end="100" time="700" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="700" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="fade" start="15" end="100" time="700" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="700" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="fade" start="0" end="100" time="1000" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="fade" start="0" end="100" time="1000" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="1000" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="fade" start="15" end="100" time="1000" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="1000" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="fade" start="15" end="100" time="1000" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="1000" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="fade" start="0" end="100" time="1500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="fade" start="0" end="100" time="1500" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="1500" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="fade" start="15" end="100" time="1500" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="1500" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="fade" start="15" end="100" time="1500" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="1500" tween="quadratic" easing="out"/>
+            </animation>
+        </control>
+        <control type="image" id="1007">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>stretch</aspectratio>
+            <texture/>
+            <visible>String.IsEqual(Window.Property(JJSPhotoLayer),B)+String.IsEqual(Window.Property(JJSProjectorActive),0)</visible>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="fade" start="0" end="100" time="120" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="fade" start="0" end="100" time="120" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="120" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="fade" start="15" end="100" time="120" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="120" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="fade" start="15" end="100" time="120" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="120" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="fade" start="0" end="100" time="180" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="fade" start="0" end="100" time="180" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="180" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="fade" start="15" end="100" time="180" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="180" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="fade" start="15" end="100" time="180" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="180" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="fade" start="0" end="100" time="250" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="fade" start="0" end="100" time="250" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="250" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="fade" start="15" end="100" time="250" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="250" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="fade" start="15" end="100" time="250" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="250" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="fade" start="0" end="100" time="350" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="fade" start="0" end="100" time="350" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="350" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="fade" start="15" end="100" time="350" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="350" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="fade" start="15" end="100" time="350" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="350" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="fade" start="0" end="100" time="500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="fade" start="0" end="100" time="500" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="500" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="fade" start="15" end="100" time="500" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="500" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="fade" start="15" end="100" time="500" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="500" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="fade" start="0" end="100" time="700" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="fade" start="0" end="100" time="700" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="700" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="fade" start="15" end="100" time="700" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="700" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="fade" start="15" end="100" time="700" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="700" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="fade" start="0" end="100" time="1000" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="fade" start="0" end="100" time="1000" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="1000" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="fade" start="15" end="100" time="1000" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="1000" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="fade" start="15" end="100" time="1000" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="1000" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="fade" start="0" end="100" time="1500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),zoom)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="fade" start="0" end="100" time="1500" tween="sine" easing="inout"/>
+                <effect type="zoom" start="96" end="100" center="960,540" time="1500" tween="sine" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="fade" start="15" end="100" time="1500" tween="sine" easing="inout"/>
+                <effect type="slide" start="140,0" end="0,0" time="1500" tween="quadratic" easing="out"/>
+            </animation>
+            <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),slide)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="fade" start="15" end="100" time="1500" tween="sine" easing="inout"/>
+                <effect type="slide" start="-140,0" end="0,0" time="1500" tween="quadratic" easing="out"/>
+            </animation>
+        </control>
+        <control type="image" id="1008">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>stretch</aspectratio>
+            <texture/>
+            <visible>String.IsEqual(Window.Property(JJSProjectorActive),1)</visible>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="120" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="120" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="180" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="180" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="250" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="250" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="350" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="350" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="700" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="700" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="1000" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="1000" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="1500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="1500" tween="sine" easing="inout"/>
+            </animation>
+        </control>
+        <control type="image" id="1009">
+            <left>0</left>
+            <top>0</top>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>stretch</aspectratio>
+            <texture/>
+            <visible>String.IsEqual(Window.Property(JJSProjectorActive),1)</visible>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="120" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="120" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="180" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),180)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="180" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="250" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),250)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="250" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="350" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),350)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="350" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),500)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="700" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),700)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="700" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="1000" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1000)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="1000" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="slide" start="1920,0" end="0,0" time="1500" tween="sine" easing="inout"/>
+            </animation>
+            <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
+                <effect type="slide" start="-1920,0" end="0,0" time="1500" tween="sine" easing="inout"/>
+            </animation>
+        </control>
+        <control type="image" id="1010">
+            <left>32</left>
+            <top>980</top>
+            <width>54</width>
+            <height>54</height>
+            <aspectratio>keep</aspectratio>
+            <texture>play-status.png</texture>
+            <visible>String.IsEqual(Window.Property(JJSSlideshowIcon),play)</visible>
+        </control>
+        <control type="image" id="1011">
+            <left>32</left>
+            <top>980</top>
+            <width>54</width>
+            <height>54</height>
+            <aspectratio>keep</aspectratio>
+            <texture>pause-status.png</texture>
+            <visible>String.IsEqual(Window.Property(JJSSlideshowIcon),pause)</visible>
+        </control>
+        <control type="image" id="1012">
+            <left>32</left>
+            <top>980</top>
+            <width>54</width>
+            <height>54</height>
+            <aspectratio>keep</aspectratio>
+            <texture>stop-status.png</texture>
+            <visible>String.IsEqual(Window.Property(JJSSlideshowIcon),stop)</visible>
+        </control>
+        <control type="label" id="1006">
+            <left>30</left>
+            <top>1018</top>
+            <width>1860</width>
+            <height>42</height>
+            <font>font12</font>
+            <textcolor>88FFFFFF</textcolor>
+            <align>right</align>
+            <aligny>center</aligny>
+            <label/>
+            <visible>String.IsEqual(Window.Property(JJSMenu),1)</visible>
+        </control>
+        <control type="button" id="9900">
+            <left>-10</left>
+            <top>-10</top>
+            <width>1</width>
+            <height>1</height>
+            <label/>
+            <font/>
+            <texturefocus/>
+            <texturenofocus/>
+            <onleft>9900</onleft>
+            <onright>9900</onright>
+            <onup>9900</onup>
+            <ondown>9900</ondown>
+        </control>
+        <control type="group" id="8000">
+            <left>-375</left>
+            <visible>String.IsEqual(Window.Property(JJSMenu),1)</visible>
+            <animation effect="slide" start="0,0" end="375,0" time="300" tween="quadratic" easing="out">Visible</animation>
+            <animation effect="slide" start="375,0" end="0,0" time="225" tween="quadratic" easing="in">Hidden</animation>
+            <control type="image">
+                <left>-30</left>
+                <top>0</top>
+                <width>420</width>
+                <height>1080</height>
+                <texture colordiffuse="F0181818">white.png</texture>
+            </control>
+            <control type="image">
+                <left>-30</left>
+                <top>0</top>
+                <width>420</width>
+                <height>1080</height>
+                <texture border="0,0,10,0">MediaBladeSub.png</texture>
+            </control>
+            <control type="image">
+                <left>23</left>
+                <top>0</top>
+                <width>330</width>
+                <height>120</height>
+                <aspectratio>keep</aspectratio>
+                <texture>Confluence_Logo.png</texture>
+            </control>
+            <control type="grouplist" id="9000">
+                <left>0</left>
+                <top>165</top>
+                <width>375</width>
+                <height>900</height>
+                <onleft>9000</onleft>
+                <onright>9900</onright>
+                <onup>9000</onup>
+                <ondown>9000</ondown>
+                <onback>9900</onback>
+                <itemgap>0</itemgap>
+                <control type="label" id="9002">
+                    <width>375</width>
+                    <height>53</height>
+                    <font>font12</font>
+                    <label>JJS Picture Viewer</label>
+                    <textcolor>blue</textcolor>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                </control>
+                <control type="button" id="9101">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9102">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9103">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9104">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9105">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9106">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9107">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9108">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9109">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9110">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9112">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9113">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9114">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9115">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+                <control type="button" id="9116">
+                    <width>375</width>
+                    <height>60</height>
+                    <textoffsetx>15</textoffsetx>
+                    <textwidth>300</textwidth>
+                    <aligny>center</aligny>
+                    <font>font13</font>
+                    <texturefocus border="5">button-focus.png</texturefocus>
+                    <texturenofocus/>
+                    <pulseonselect>false</pulseonselect>
+                </control>
+            </control>
+        </control>
+    </controls>
+</window>
