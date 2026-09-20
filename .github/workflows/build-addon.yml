@@ -93,14 +93,6 @@ jobs:
         shell: bash
         run: sha256sum "$ADDON_ZIP"
 
-      - name: Upload add-on ZIP artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: script.jjs.pictureviewer-${{ env.ADDON_VERSION }}
-          path: ${{ env.ADDON_ZIP }}
-          if-no-files-found: error
-          retention-days: 90
-
       - name: Publish direct-install GitHub Release
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         shell: bash
