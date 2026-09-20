@@ -8,12 +8,14 @@ Der Viewer ist auf große Bildordner und Netzwerkquellen ausgelegt, zeigt immer 
 
 ## Installation
 
-Das installierbare Kodi-ZIP wird über GitHub Actions aus dem Quellstand dieses Repositories erzeugt.
+Das installierbare Kodi-ZIP wird automatisch aus dem Quellstand dieses Repositories erzeugt und als **GitHub Release** veröffentlicht.
 
-1. In GitHub **Actions → Build Kodi add-on ZIP** öffnen.
-2. Einen erfolgreichen Build auswählen.
-3. Das Artifact `script.jjs.pictureviewer-<Version>` herunterladen.
-4. In Kodi **Add-ons → Aus ZIP-Datei installieren** wählen und das erzeugte ZIP installieren.
+1. Auf der Repository-Seite **Releases** öffnen.
+2. Den gewünschten Release auswählen.
+3. Unter **Assets** direkt `script.jjs.pictureviewer-<Version>.zip` herunterladen.
+4. In Kodi **Add-ons → Aus ZIP-Datei installieren** wählen und genau diese Datei installieren.
+
+Der Build erzeugt bewusst **kein zusätzliches GitHub-Actions-Artifact**, weil GitHub Artifacts selbst wiederum als ZIP heruntergeladen werden und dadurch ein unnötiges Doppel-ZIP entstehen würde.
 
 Das Add-on benötigt Kodi mit Python 3 (`xbmc.python >= 3.0.0`) und das Kodi-Modul `script.module.pil >= 5.1.0`. Beide Abhängigkeiten sind in `addon.xml` deklariert.
 
@@ -194,13 +196,11 @@ Der Workflow `.github/workflows/build-addon.yml` prüft unter anderem:
 - Vorhandensein der erforderlichen Laufzeitdateien
 - korrekte ZIP-Struktur mit `script.jjs.pictureviewer/` als oberstem Add-on-Ordner
 
-Das erzeugte Artifact heißt:
-
-`script.jjs.pictureviewer-<Version>`
-
-und enthält das direkt in Kodi installierbare ZIP:
+Das direkt in Kodi installierbare Release-Asset heißt:
 
 `script.jjs.pictureviewer-<Version>.zip`
+
+Es wird ohne zusätzliche ZIP-Hülle unter **Releases → Assets** veröffentlicht.
 
 ## Versionshistorie
 
