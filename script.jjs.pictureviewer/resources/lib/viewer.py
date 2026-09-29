@@ -37,25 +37,6 @@ LEGACY_MEDIA_KEYMAP_FILES = (
     'zz_jjs_pictureviewer.xml',
     'zzz_jjs_pictureviewer_active.xml',
 )
-PICTURE_SELECT_KEYMAP_FILE = 'zz_jjs_pictureviewer_select.xml'
-PICTURE_SELECT_KEYMAP_XML = '''<?xml version="1.0" encoding="UTF-8"?>
-<keymap>
-  <Pictures>
-    <remote>
-      <select>RunScript(script.jjs.pictureviewer,native-select)</select>
-    </remote>
-    <keyboard>
-      <return>RunScript(script.jjs.pictureviewer,native-select)</return>
-      <enter>RunScript(script.jjs.pictureviewer,native-select)</enter>
-      <ok>RunScript(script.jjs.pictureviewer,native-select)</ok>
-      <select>RunScript(script.jjs.pictureviewer,native-select)</select>
-    </keyboard>
-    <mouse>
-      <leftclick>RunScript(script.jjs.pictureviewer,native-select)</leftclick>
-    </mouse>
-  </Pictures>
-</keymap>
-'''
 
 
 def _keymap_path(filename):
@@ -84,62 +65,6 @@ def _cleanup_legacy_media_keymaps():
                  (filename, exc), xbmc.LOGWARNING)
     if changed:
         xbmc.executebuiltin('ReloadKeymaps')
-
-
-def _ensure_picture_select_keymap():
-    """Route Select only in Kodi's Pictures window through this add-on.
-
-    Folder/source/add-source items are handed straight back to Kodi with
-    Action(Select); only actual image files are consumed by the JJS viewer.
-    """
-    keymap_dir = 'special://profile/keymaps/'
-    path = keymap_dir + PICTURE_SELECT_KEYMAP_FILE
-    try:
-        if not xbmcvfs.exists(keymap_dir):
-            xbmcvfs.mkdirs(keymap_dir)
-        current = ''
-        if xbmcvfs.exists(path):
-            f = xbmcvfs.File(path)
-            current = f.read()
-            f.close()
-        if current == PICTURE_SELECT_KEYMAP_XML:
-            return
-        f = xbmcvfs.File(path, 'w')
-        f.write(PICTURE_SELECT_KEYMAP_XML)
-        f.close()
-        xbmc.executebuiltin('ReloadKeymaps')
-        _log('Pictures-Select-Keymap installiert/aktualisiert')
-    except Exception as exc:
-        _log('Pictures-Select-Keymap konnte nicht installiert werden: %r' % (exc,),
-             xbmc.LOGERROR)
-
-
-def _native_picture_select():
-    """Handle Select in Kodi's native Pictures window.
-
-    Kodi keeps full ownership of navigation and source management.  We only
-    intercept real image files and open them in the JJS viewer.
-    """
-    if xbmcgui.getCurrentWindowId() != WINDOW_PICTURES:
-        xbmc.executebuiltin('Action(Select)')
-        return
-
-    try:
-        is_folder = xbmc.getCondVisibility('ListItem.IsFolder')
-    except Exception:
-        is_folder = False
-
-    path = (xbmc.getInfoLabel('ListItem.FileNameAndPath') or
-            xbmc.getInfoLabel('ListItem.Path') or '').strip()
-
-    # Parent folders, shares, "Add source" and every non-image item stay 100 %
-    # native. Action(Select) is a direct GUI action, not another keymap lookup,
-    # so this does not recurse into this handler.
-    if is_folder or not path or os.path.splitext(path)[1].lower() not in IMAGE_EXTENSIONS:
-        xbmc.executebuiltin('Action(Select)')
-        return
-
-    show_image(path)
 
 IMAGE_EXTENSIONS = {
     '.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif', '.tif', '.tiff'
@@ -1760,15 +1685,22 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         return max(min_value, min(max_value, n))
 
     def _choose_background_image(self):
-        mask = '.jpg|.jpeg|.png|.webp|.bmp|.gif|.tif|.tiff'
+        # Use Kodi's normal file-manager sources instead of an unscoped browser.
+        # The old empty shares argument combined with the bundled default image
+        # could open the selector inside this add-on's installation directory.
+        # "files" starts from Kodi's normal file sources (plus local drives), so
+        # SMB/NFS and other paths configured in the File Manager are reachable.
         current = self.settings.get('custom_background', '')
+        if (self.settings.get('background_mode') != 'custom' or
+                _norm_vfs_path(current) == _norm_vfs_path(DEFAULT_BACKGROUND_IMAGE)):
+            current = ''
         try:
             return xbmcgui.Dialog().browseSingle(
-                2, 'Hintergrundbild wählen', '', mask=mask,
+                2, 'Hintergrundbild wählen', 'files',
                 useThumbs=True, treatAsFolder=False, defaultt=current)
         except TypeError:
             return xbmcgui.Dialog().browseSingle(
-                2, 'Hintergrundbild wählen', '', mask, True, False, current)
+                2, 'Hintergrundbild wählen', 'files', '', True, False, current)
 
     def _settings_changed(self, focus_id):
         save_settings(self.settings)
@@ -2229,23 +2161,17 @@ def show_image(selected_image):
 
 def run_script():
     requested = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else ''
-    if requested == 'native-select':
-        _native_picture_select()
-        return
     if requested and os.path.splitext(requested)[1].lower() in IMAGE_EXTENSIONS:
         show_image(requested)
         return
-
-    # Use Kodi's real Pictures/MyPics.xml browser directly. Kodi therefore owns
-    # sources, folders, context menus and source editing; our Pictures-only
-    # keymap changes only what happens when a real image is selected.
-    _ensure_picture_select_keymap()
-    xbmc.executebuiltin('ActivateWindow(Pictures)')
+    # The *real* Pictures/MyPics.xml window renders our plugin directory. This
+    # preserves Kodi/Confluence browsing and sideblade behaviour, while image
+    # clicks route directly to our own viewer instead of SlideShow.
+    xbmc.executebuiltin('ActivateWindow(Pictures,plugin://%s/,return)' % ADDON_ID)
 
 
 def run():
     _cleanup_legacy_media_keymaps()
-    _ensure_picture_select_keymap()
     if sys.argv and str(sys.argv[0]).startswith('plugin://'):
         run_plugin()
     else:
