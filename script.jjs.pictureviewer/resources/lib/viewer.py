@@ -1665,11 +1665,11 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                                'Gallery' if s['display_mode'] == 'gallery' else 'Fullscreen')
         self._set_button_label(BTN_GALLERY_SIZE, 'Gallery size', '%d %%' % int(s['gallery_percent']))
         self._set_button_label(BTN_BACKGROUND, 'Background', {
-            'viewer_default': 'PictureViewer Default',
+            'viewer_default': 'Picture Viewer Default',
             'skin': 'Skin-Wallpaper',
             'black': 'Black',
             'custom': 'Custom image',
-        }.get(s.get('background_mode', 'viewer_default'), 'PictureViewer Default'))
+        }.get(s.get('background_mode', 'viewer_default'), 'Picture Viewer Default'))
         self._set_button_label(BTN_CUSTOM_BACKGROUND, 'Custom background image',
                                os.path.basename(s.get('custom_background', '').rstrip('/\\')) or 'not selected')
         self._set_button_label(BTN_BORDER, 'White border', 'On' if s['white_border'] else 'Off')
@@ -1750,7 +1750,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                 self._settings_changed(control_id)
         elif control_id == BTN_BACKGROUND:
             values = [
-                ('viewer_default', 'PictureViewer Default'),
+                ('viewer_default', 'Picture Viewer Default'),
                 ('skin', 'Skin-Wallpaper'),
                 ('black', 'Black'),
                 ('custom', 'Custom image'),
