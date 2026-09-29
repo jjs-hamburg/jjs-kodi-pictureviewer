@@ -2002,7 +2002,7 @@ def _plugin_listing(handle, real_path=''):
     try:
         dirs, files = xbmcvfs.listdir(real_path)
     except Exception as exc:
-        _log('Bilderordner kann nicht gelesen werden %s: %r' % (real_path, exc), xbmc.LOGERROR)
+        _log('Picture folder could not be read %s: %r' % (real_path, exc), xbmc.LOGERROR)
         xbmcplugin.endOfDirectory(handle, succeeded=False, cacheToDisc=False)
         return
 
