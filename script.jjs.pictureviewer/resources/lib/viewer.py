@@ -36,6 +36,10 @@ DEFAULT_BACKGROUND_IMAGE = os.path.join(ADDON_PATH, 'resources', 'media', 'defau
 LEGACY_MEDIA_KEYMAP_FILES = (
     'zz_jjs_pictureviewer.xml',
     'zzz_jjs_pictureviewer_active.xml',
+    # 0.1.46 briefly installed a Pictures-window Select override while testing
+    # direct use of Kodi's native picture browser. That approach was reverted,
+    # but the profile keymap survives add-on updates unless we remove it here.
+    'zz_jjs_pictureviewer_select.xml',
 )
 
 
