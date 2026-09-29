@@ -59,9 +59,9 @@ def _cleanup_legacy_media_keymaps():
         try:
             if _delete_keymap(filename):
                 changed = True
-                _log('Alte Media-Keymap entfernt: %s' % filename)
+                _log('Legacy media keymap removed: %s' % filename)
         except Exception as exc:
-            _log('Alte Media-Keymap konnte nicht entfernt werden %s: %r' %
+            _log('Legacy media keymap could not be removed %s: %r' %
                  (filename, exc), xbmc.LOGWARNING)
     if changed:
         xbmc.executebuiltin('ReloadKeymaps')
@@ -232,7 +232,7 @@ def load_settings():
             if isinstance(stored, dict):
                 data.update(stored)
     except Exception as exc:
-        _log('Einstellungen konnten nicht gelesen werden: %r' % (exc,), xbmc.LOGWARNING)
+        _log('Settings could not be read: %r' % (exc,), xbmc.LOGWARNING)
 
     # One-time migration from 0.1.0-0.1.2: their Python WindowDialog used a
     # coordinate model that was wrong on the Shield and the 92 % default was
@@ -347,7 +347,7 @@ def save_settings(settings):
         f.write(json.dumps(settings, ensure_ascii=False, indent=2))
         f.close()
     except Exception as exc:
-        _log('Einstellungen konnten nicht gespeichert werden: %r' % (exc,), xbmc.LOGERROR)
+        _log('Settings could not be saved: %r' % (exc,), xbmc.LOGERROR)
 
 
 def _save_listing_cache(folder, image_names):
@@ -368,7 +368,7 @@ def _save_listing_cache(folder, image_names):
         f.write(json.dumps(payload, ensure_ascii=False))
         f.close()
     except Exception as exc:
-        _log('Bilderlisten-Cache konnte nicht geschrieben werden: %r' % (exc,), xbmc.LOGWARNING)
+        _log('Picture-list cache could not be written: %r' % (exc,), xbmc.LOGWARNING)
 
 
 def _load_listing_cache(folder, selected_image='', max_age=1800):
@@ -410,7 +410,7 @@ def _load_listing_cache(folder, selected_image='', max_age=1800):
                 return []
         return result
     except Exception as exc:
-        _log('Bilderlisten-Cache konnte nicht gelesen werden: %r' % (exc,), xbmc.LOGWARNING)
+        _log('Picture-list cache could not be read: %r' % (exc,), xbmc.LOGWARNING)
         return []
 
 
@@ -438,7 +438,7 @@ def list_images(folder):
     try:
         _dirs, files = xbmcvfs.listdir(folder)
     except Exception as exc:
-        _log('Ordner kann nicht gelesen werden %s: %r' % (folder, exc), xbmc.LOGERROR)
+        _log('Folder could not be read %s: %r' % (folder, exc), xbmc.LOGERROR)
         return []
     result = []
     for name in files:
@@ -1211,7 +1211,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         if not already:
             name, path = self.images[index]
             detail = (' (%s)' % reason) if reason else ''
-            _log('Bild wird fuer diese Sitzung uebersprungen: %s [%s]%s' %
+            _log('Image skipped for this session: %s [%s]%s' %
                  (name, path, detail), xbmc.LOGWARNING)
         return not already
 
@@ -1250,7 +1250,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             rendered = _render_overlay(path, self.settings, slot)
         except Exception as exc:
             self._mark_bad_image(target, repr(exc))
-            _log('Bild konnte nicht vorbereitet werden %s: %r' % (path, exc), xbmc.LOGERROR)
+            _log('Image could not be prepared %s: %r' % (path, exc), xbmc.LOGERROR)
             return False
         finally:
             self.rendering = False
@@ -1316,7 +1316,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             except Exception as exc:
                 render_failed = True
                 failure_reason = repr(exc)
-                _log('Vorladen fehlgeschlagen %s: %r' % (path, exc), xbmc.LOGWARNING)
+                _log('Prefetch failed %s: %r' % (path, exc), xbmc.LOGWARNING)
             finally:
                 restart = False
                 deferred_action = ''
@@ -1455,7 +1455,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                                 self.pending_next_move = None
                             timed_out = True
                     if timed_out:
-                        _log('Prefetch nach %.0f s abgebrochen; Vorladen voruebergehend deaktiviert' %
+                        _log('Prefetch abandoned after %.0f s; preloading temporarily disabled' %
                              PREFETCH_TIMEOUT_SECONDS, xbmc.LOGWARNING)
                         if timeout_action:
                             xbmc.executebuiltin('Action(%s)' % timeout_action)
@@ -1472,7 +1472,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                                 self.prefetch_disabled_session = False
                                 recover_prefetch = True
                     if recover_prefetch and bool(self.settings.get('preload_next', True)):
-                        _log('Prefetch-Worker wieder frei; Vorladen wird fortgesetzt')
+                        _log('Prefetch worker available again; preloading resumed')
                         self._kick_prefetch()
 
                     # XML Visible animations must be settled on Kodi's GUI thread.
@@ -1523,7 +1523,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                         self.last_change = time.monotonic()
                         xbmc.executebuiltin('Action(NextPicture)')
                 except Exception as exc:
-                    _log('Diashow-Timer: %r' % (exc,), xbmc.LOGWARNING)
+                    _log('Slideshow timer: %r' % (exc,), xbmc.LOGWARNING)
                 if self.stop_event.wait(wait_time):
                     break
 
@@ -1988,7 +1988,7 @@ def _add_plugin_image(handle, label, real_path):
 
 def _plugin_listing(handle, real_path=''):
     xbmcplugin.setContent(handle, 'files')
-    xbmcplugin.setPluginCategory(handle, 'Bilder')
+    xbmcplugin.setPluginCategory(handle, 'Pictures')
 
     if not real_path:
         sources = _picture_sources()
@@ -2147,10 +2147,10 @@ def show_image(selected_image):
         return
     images = _load_listing_cache(folder, selected_image)
     if images:
-        _log('Bildliste aus Browser-Cache: %d Bilder' % len(images))
+        _log('Picture list from browser cache: %d images' % len(images))
     else:
         images = list_images(folder)
-        _log('Bildliste neu gelesen: %d Bilder' % len(images))
+        _log('Picture list rescanned: %d images' % len(images))
     if not images:
         xbmcgui.Dialog().notification(ADDON_NAME, 'No supported images in this folder',
                                       xbmcgui.NOTIFICATION_WARNING, 3000)
