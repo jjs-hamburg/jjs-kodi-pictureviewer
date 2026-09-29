@@ -193,7 +193,7 @@ CANVAS_W = 1920
 CANVAS_H = 1080
 
 DEFAULTS = {
-    'settings_version': 12,
+    'settings_version': 13,
     'display_mode': 'gallery',
     'gallery_percent': 85,
     'background_mode': 'viewer_default',
@@ -201,9 +201,9 @@ DEFAULTS = {
     'white_border': True,
     'border_width': 10,
     'shadow': True,
-    'shadow_width': 24,
+    'shadow_width': 26,
     'shadow_offset': 30,
-    'shadow_opacity': 90,
+    'shadow_opacity': 60,
     'slideshow_interval': 5,
     'preload_next': True,
     'transition_mode': 'projector',
@@ -319,6 +319,20 @@ def load_settings():
             data['background_mode'] = 'viewer_default'
         data['settings_version'] = 12
         save_settings(data)
+    # 0.1.50: new public-release defaults. Migrate only the exact previous
+    # shadow defaults so deliberate user choices remain untouched.
+    if int(data.get('settings_version', 0) or 0) < 13:
+        try:
+            if (int(stored.get('shadow_width', 24)) == 24 and
+                    int(stored.get('shadow_offset', 30)) == 30 and
+                    int(stored.get('shadow_opacity', 90)) == 90):
+                data['shadow_width'] = 26
+                data['shadow_offset'] = 30
+                data['shadow_opacity'] = 60
+        except Exception:
+            pass
+        data['settings_version'] = 13
+        save_settings(data)
     return data
 
 
@@ -328,7 +342,7 @@ def save_settings(settings):
         # jump_size belonged to the old Hoch/Runter navigation model and must
         # never be written again from 0.1.35 onward.
         settings.pop('jump_size', None)
-        settings['settings_version'] = 12
+        settings['settings_version'] = 13
         f = xbmcvfs.File(SETTINGS_FILE, 'w')
         f.write(json.dumps(settings, ensure_ascii=False, indent=2))
         f.close()
@@ -1647,35 +1661,35 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         if not getattr(self, 'ready', False):
             return
         s = self.settings
-        self._set_button_label(BTN_MODE, 'Darstellung',
-                               'Galerie' if s['display_mode'] == 'gallery' else 'Vollbild')
-        self._set_button_label(BTN_GALLERY_SIZE, 'Galeriegröße', '%d %%' % int(s['gallery_percent']))
-        self._set_button_label(BTN_BACKGROUND, 'Hintergrund', {
+        self._set_button_label(BTN_MODE, 'Display mode',
+                               'Gallery' if s['display_mode'] == 'gallery' else 'Fullscreen')
+        self._set_button_label(BTN_GALLERY_SIZE, 'Gallery size', '%d %%' % int(s['gallery_percent']))
+        self._set_button_label(BTN_BACKGROUND, 'Background', {
             'viewer_default': 'PictureViewer Default',
             'skin': 'Skin-Wallpaper',
-            'black': 'Schwarz',
-            'custom': 'Eigenes Bild',
+            'black': 'Black',
+            'custom': 'Custom image',
         }.get(s.get('background_mode', 'viewer_default'), 'PictureViewer Default'))
-        self._set_button_label(BTN_CUSTOM_BACKGROUND, 'Eigenes Hintergrundbild',
-                               os.path.basename(s.get('custom_background', '').rstrip('/\\')) or 'nicht gewählt')
-        self._set_button_label(BTN_BORDER, 'Weißer Rand', 'Ein' if s['white_border'] else 'Aus')
-        self._set_button_label(BTN_BORDER_WIDTH, 'Randbreite', '%d px' % int(s['border_width']))
-        self._set_button_label(BTN_SHADOW, 'Schatten', 'Ein' if s['shadow'] else 'Aus')
-        self._set_button_label(BTN_SHADOW_WIDTH, 'Schattenbreite', '%d px' % int(s['shadow_width']))
-        self._set_button_label(BTN_SHADOW_OFFSET, 'Schattenversatz', '%d px' % int(s['shadow_offset']))
-        self._set_button_label(BTN_SHADOW_OPACITY, 'Schattenstärke', '%d %%' % int(s['shadow_opacity']))
-        slideshow_label = ('Pausiert' if self.slideshow_active and self.slideshow_paused
-                           else ('Stoppen' if self.slideshow_active else 'Starten'))
-        self._set_button_label(BTN_SLIDESHOW, 'Diashow', slideshow_label)
-        self._set_button_label(BTN_SLIDESHOW_INTERVAL, 'Diashow-Intervall',
+        self._set_button_label(BTN_CUSTOM_BACKGROUND, 'Custom background image',
+                               os.path.basename(s.get('custom_background', '').rstrip('/\\')) or 'not selected')
+        self._set_button_label(BTN_BORDER, 'White border', 'On' if s['white_border'] else 'Off')
+        self._set_button_label(BTN_BORDER_WIDTH, 'Border width', '%d px' % int(s['border_width']))
+        self._set_button_label(BTN_SHADOW, 'Shadow', 'On' if s['shadow'] else 'Off')
+        self._set_button_label(BTN_SHADOW_WIDTH, 'Shadow width', '%d px' % int(s['shadow_width']))
+        self._set_button_label(BTN_SHADOW_OFFSET, 'Shadow offset', '%d px' % int(s['shadow_offset']))
+        self._set_button_label(BTN_SHADOW_OPACITY, 'Shadow strength', '%d %%' % int(s['shadow_opacity']))
+        slideshow_label = ('Paused' if self.slideshow_active and self.slideshow_paused
+                           else ('Stop' if self.slideshow_active else 'Start'))
+        self._set_button_label(BTN_SLIDESHOW, 'Slideshow', slideshow_label)
+        self._set_button_label(BTN_SLIDESHOW_INTERVAL, 'Slideshow interval',
                                '%d s' % int(s.get('slideshow_interval', 5)))
-        self._set_button_label(BTN_PRELOAD_NEXT, 'Nächstes Bild vorladen',
-                               'Ein' if s.get('preload_next', True) else 'Aus')
-        self._set_button_label(BTN_TRANSITION, 'Übergang', {
-            'none': 'Aus', 'fade': 'Überblenden', 'zoom': 'Sanftes Zoom',
-            'slide': 'Einschieben', 'projector': 'Diaprojektor'
-        }.get(s.get('transition_mode', 'fade'), 'Überblenden'))
-        self._set_button_label(BTN_TRANSITION_DURATION, 'Übergangsdauer',
+        self._set_button_label(BTN_PRELOAD_NEXT, 'Preload next image',
+                               'On' if s.get('preload_next', True) else 'Off')
+        self._set_button_label(BTN_TRANSITION, 'Transition', {
+            'none': 'Off', 'fade': 'Fade', 'zoom': 'Gentle zoom',
+            'slide': 'Slide', 'projector': 'Projector'
+        }.get(s.get('transition_mode', 'fade'), 'Fade'))
+        self._set_button_label(BTN_TRANSITION_DURATION, 'Transition duration',
                                '%d ms' % self._transition_duration_ms())
 
     def _choose_number(self, heading, current, min_value, max_value):
@@ -1700,11 +1714,11 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             current = ''
         try:
             return xbmcgui.Dialog().browseSingle(
-                2, 'Hintergrundbild wählen', 'files',
+                2, 'Select background image', 'files',
                 useThumbs=True, treatAsFolder=False, defaultt=current)
         except TypeError:
             return xbmcgui.Dialog().browseSingle(
-                2, 'Hintergrundbild wählen', 'files', '', True, False, current)
+                2, 'Select background image', 'files', '', True, False, current)
 
     def _settings_changed(self, focus_id):
         save_settings(self.settings)
@@ -1730,7 +1744,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                 pre = options.index(int(s['gallery_percent']))
             except ValueError:
                 pre = -1
-            idx = xbmcgui.Dialog().select('Galeriegröße', labels, preselect=pre)
+            idx = xbmcgui.Dialog().select('Gallery size', labels, preselect=pre)
             if idx >= 0:
                 s['gallery_percent'] = options[idx]
                 self._settings_changed(control_id)
@@ -1738,12 +1752,12 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             values = [
                 ('viewer_default', 'PictureViewer Default'),
                 ('skin', 'Skin-Wallpaper'),
-                ('black', 'Schwarz'),
-                ('custom', 'Eigenes Bild'),
+                ('black', 'Black'),
+                ('custom', 'Custom image'),
             ]
             current = s.get('background_mode', 'viewer_default')
             pre = next((i for i, item in enumerate(values) if item[0] == current), 0)
-            idx = xbmcgui.Dialog().select('Hintergrund', [item[1] for item in values], preselect=pre)
+            idx = xbmcgui.Dialog().select('Background', [item[1] for item in values], preselect=pre)
             if idx >= 0:
                 s['background_mode'] = values[idx][0]
                 if s['background_mode'] == 'custom' and not s.get('custom_background'):
@@ -1761,7 +1775,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             s['white_border'] = not bool(s['white_border'])
             self._settings_changed(control_id)
         elif control_id == BTN_BORDER_WIDTH:
-            n = self._choose_number('Randbreite in Pixeln', int(s['border_width']), 0, 100)
+            n = self._choose_number('Border width in pixels', int(s['border_width']), 0, 100)
             if n is not None:
                 s['border_width'] = n
                 self._settings_changed(control_id)
@@ -1769,17 +1783,17 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             s['shadow'] = not bool(s['shadow'])
             self._settings_changed(control_id)
         elif control_id == BTN_SHADOW_WIDTH:
-            n = self._choose_number('Schattenbreite in Pixeln', int(s['shadow_width']), 0, 150)
+            n = self._choose_number('Shadow width in pixels', int(s['shadow_width']), 0, 150)
             if n is not None:
                 s['shadow_width'] = n
                 self._settings_changed(control_id)
         elif control_id == BTN_SHADOW_OFFSET:
-            n = self._choose_number('Schattenversatz in Pixeln', int(s['shadow_offset']), 0, 100)
+            n = self._choose_number('Shadow offset in pixels', int(s['shadow_offset']), 0, 100)
             if n is not None:
                 s['shadow_offset'] = n
                 self._settings_changed(control_id)
         elif control_id == BTN_SHADOW_OPACITY:
-            n = self._choose_number('Schattenstärke in Prozent', int(s['shadow_opacity']), 0, 100)
+            n = self._choose_number('Shadow strength in percent', int(s['shadow_opacity']), 0, 100)
             if n is not None:
                 s['shadow_opacity'] = n
                 self._settings_changed(control_id)
@@ -1787,7 +1801,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             self._toggle_slideshow()
             self.setFocusId(control_id)
         elif control_id == BTN_SLIDESHOW_INTERVAL:
-            n = self._choose_number('Diashow-Intervall in Sekunden',
+            n = self._choose_number('Slideshow interval in seconds',
                                     int(s.get('slideshow_interval', 5)), 1, 3600)
             if n is not None:
                 s['slideshow_interval'] = n
@@ -1807,12 +1821,12 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                 self._kick_prefetch()
             self.setFocusId(control_id)
         elif control_id == BTN_TRANSITION:
-            values = [('none', 'Aus'), ('fade', 'Überblenden'),
-                      ('zoom', 'Sanftes Zoom'), ('slide', 'Einschieben'),
-                      ('projector', 'Diaprojektor')]
+            values = [('none', 'Off'), ('fade', 'Fade'),
+                      ('zoom', 'Gentle zoom'), ('slide', 'Slide'),
+                      ('projector', 'Projector')]
             current = s.get('transition_mode', 'fade')
             pre = next((i for i, item in enumerate(values) if item[0] == current), 1)
-            idx = xbmcgui.Dialog().select('Übergang', [item[1] for item in values], preselect=pre)
+            idx = xbmcgui.Dialog().select('Transition', [item[1] for item in values], preselect=pre)
             if idx >= 0:
                 s['transition_mode'] = values[idx][0]
                 save_settings(s)
@@ -1826,7 +1840,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                 pre = values.index(current)
             except ValueError:
                 pre = 3
-            idx = xbmcgui.Dialog().select('Übergangsdauer', labels, preselect=pre)
+            idx = xbmcgui.Dialog().select('Transition duration', labels, preselect=pre)
             if idx >= 0:
                 s['transition_duration_ms'] = values[idx]
                 save_settings(s)
@@ -1978,7 +1992,7 @@ def _plugin_listing(handle, real_path=''):
 
     if not real_path:
         sources = _picture_sources()
-        _add_plugin_action(handle, 'Kodi-Bildquellen verwalten…', 'manage_sources')
+        _add_plugin_action(handle, 'Manage Kodi picture sources…', 'manage_sources')
         for label, path in sources:
             _add_plugin_folder(handle, label, path)
         xbmcplugin.addSortMethod(handle, xbmcplugin.SORT_METHOD_LABEL)
@@ -2138,7 +2152,7 @@ def show_image(selected_image):
         images = list_images(folder)
         _log('Bildliste neu gelesen: %d Bilder' % len(images))
     if not images:
-        xbmcgui.Dialog().notification(ADDON_NAME, 'Keine unterstützten Bilder in diesem Ordner',
+        xbmcgui.Dialog().notification(ADDON_NAME, 'No supported images in this folder',
                                       xbmcgui.NOTIFICATION_WARNING, 3000)
         return
     index = _find_start_index(images, selected_image)
