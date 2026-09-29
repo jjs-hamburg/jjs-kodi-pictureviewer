@@ -27,7 +27,7 @@ SETTINGS_FILE = os.path.join(PROFILE, 'viewer_settings.json')
 LISTING_CACHE_FILE = os.path.join(PROFILE, 'last_picture_listing.json')
 TEMP_DIR = xbmcvfs.translatePath('special://temp/')
 SHADOW_TEXTURE = os.path.join(ADDON_PATH, 'resources', 'skins', 'Default', 'media', 'shadow.png')
-DEFAULT_BACKGROUND_IMAGE = os.path.join(ADDON_PATH, 'resources', 'media', 'defaultBackground.jpg')
+DEFAULT_BACKGROUND_IMAGE = os.path.join(ADDON_PATH, 'resources', 'media', 'defaultBackground-0.1.55.jpg')
 
 # 0.1.43: Play/Pause/Stop are deliberately NOT owned by the picture viewer.
 # Slideshow control is Up/Down only, so Kodi's media keys remain available for
@@ -1055,7 +1055,11 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             path = DEFAULT_BACKGROUND_IMAGE
         else:
             path = resolve_skin_wallpaper()
-        self.bg_image.setImage(path if path and _existing_image(path) else '', useCache=True)
+        # The bundled default can change between add-on versions while keeping the same
+        # logical role. Never let Kodi's texture cache pin an older bundled wallpaper.
+        # Custom/skin wallpapers keep normal caching; the bundled default is loaded fresh.
+        use_cache = (mode != 'viewer_default')
+        self.bg_image.setImage(path if path and _existing_image(path) else '', useCache=use_cache)
 
     def _layout_current(self):
         for photo in (self.photo_a, self.photo_b, self.projector_ghost_a, self.projector_ghost_b):
