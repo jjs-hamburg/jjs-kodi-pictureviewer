@@ -25,6 +25,7 @@ ADDON_PATH = ADDON.getAddonInfo('path')
 PROFILE = xbmcvfs.translatePath(ADDON.getAddonInfo('profile'))
 SETTINGS_FILE = os.path.join(PROFILE, 'viewer_settings.json')
 LISTING_CACHE_FILE = os.path.join(PROFILE, 'last_picture_listing.json')
+PICTURE_SOURCES_FILE = os.path.join(PROFILE, 'picture_sources.json')
 TEMP_DIR = xbmcvfs.translatePath('special://temp/')
 SHADOW_TEXTURE = os.path.join(ADDON_PATH, 'resources', 'skins', 'Default', 'media', 'shadow.png')
 DEFAULT_BACKGROUND_IMAGE = os.path.join(ADDON_PATH, 'resources', 'media', 'defaultBackground.jpg')
@@ -1891,16 +1892,62 @@ def _plugin_url(**params):
     return 'plugin://%s/?%s' % (ADDON_ID, urlencode(params))
 
 
+def _load_extra_picture_sources():
+    try:
+        if not xbmcvfs.exists(PICTURE_SOURCES_FILE):
+            return []
+        f = xbmcvfs.File(PICTURE_SOURCES_FILE)
+        raw = f.read()
+        f.close()
+        data = json.loads(raw) if raw else []
+    except Exception as exc:
+        _log('Eigene Bildpfade konnten nicht gelesen werden: %r' % (exc,), xbmc.LOGWARNING)
+        return []
+
+    clean = []
+    if isinstance(data, list):
+        for entry in data:
+            if not isinstance(entry, dict):
+                continue
+            path = str(entry.get('path') or '').strip()
+            if not path:
+                continue
+            label = str(entry.get('label') or path).strip()
+            clean.append((label, path))
+    return clean
+
+
+def _save_extra_picture_sources(sources):
+    _ensure_profile()
+    payload = [{'label': label, 'path': path} for label, path in sources]
+    f = xbmcvfs.File(PICTURE_SOURCES_FILE, 'w')
+    try:
+        f.write(json.dumps(payload, ensure_ascii=False, indent=2))
+    finally:
+        f.close()
+
+
 def _picture_sources():
     data = _jsonrpc('Files.GetSources', {'media': 'pictures'})
     result = data.get('result', {}) if isinstance(data, dict) else {}
     sources = result.get('sources', []) if isinstance(result, dict) else []
     clean = []
+    seen = set()
     for src in sources:
         path = (src.get('file') or '').strip()
         if not path:
             continue
+        key = _norm_vfs_path(path)
+        if key in seen:
+            continue
+        seen.add(key)
         clean.append(((src.get('label') or path).strip(), path))
+    for label, path in _load_extra_picture_sources():
+        key = _norm_vfs_path(path)
+        if key in seen:
+            continue
+        seen.add(key)
+        clean.append((label, path))
     clean.sort(key=lambda item: natural_key(item[0]))
     return clean
 
@@ -1919,6 +1966,55 @@ def _add_plugin_folder(handle, label, real_path):
     item.setArt({'icon': 'DefaultFolder.png'})
     url = _plugin_url(action='browse', path=real_path)
     xbmcplugin.addDirectoryItem(handle, url, item, isFolder=True)
+
+
+def _add_plugin_action(handle, label, action):
+    item = xbmcgui.ListItem(label=label)
+    item.setArt({'icon': 'DefaultAddSource.png'})
+    item.setProperty('IsPlayable', 'false')
+    xbmcplugin.addDirectoryItem(handle, _plugin_url(action=action), item, isFolder=False)
+
+
+def _plugin_add_source(handle):
+    try:
+        selected = xbmcgui.Dialog().browseSingle(
+            0, 'Bildpfad hinzufügen', '', '', False, False, '')
+    except Exception as exc:
+        _log('Bildpfad-Auswahl fehlgeschlagen: %r' % (exc,), xbmc.LOGERROR)
+        selected = ''
+
+    selected = str(selected or '').strip()
+    if selected:
+        current = _load_extra_picture_sources()
+        selected_key = _norm_vfs_path(selected)
+        existing = {_norm_vfs_path(path) for _label, path in current}
+        kodi_existing = {_norm_vfs_path(path) for _label, path in _picture_sources()}
+        if selected_key not in existing and selected_key not in kodi_existing:
+            default_label = os.path.basename(selected.rstrip('/\\')) or selected
+            try:
+                label = xbmcgui.Dialog().input('Name für Bildpfad', defaultt=default_label)
+            except Exception:
+                label = default_label
+            label = str(label or '').strip() or default_label
+            current.append((label, selected))
+            current.sort(key=lambda item: natural_key(item[0]))
+            try:
+                _save_extra_picture_sources(current)
+            except Exception as exc:
+                _log('Bildpfad konnte nicht gespeichert werden: %r' % (exc,), xbmc.LOGERROR)
+                xbmcgui.Dialog().notification(
+                    ADDON_NAME, 'Bildpfad konnte nicht gespeichert werden',
+                    xbmcgui.NOTIFICATION_ERROR, 3000)
+        else:
+            xbmcgui.Dialog().notification(
+                ADDON_NAME, 'Bildpfad ist bereits vorhanden',
+                xbmcgui.NOTIFICATION_INFO, 2500)
+
+    try:
+        xbmcplugin.setResolvedUrl(handle, False, xbmcgui.ListItem())
+    except Exception:
+        pass
+    xbmc.executebuiltin('Container.Refresh')
 
 
 def _add_plugin_image(handle, label, real_path):
@@ -1949,6 +2045,7 @@ def _plugin_listing(handle, real_path=''):
 
     if not real_path:
         sources = _picture_sources()
+        _add_plugin_action(handle, 'Bildpfad hinzufügen…', 'add_source')
         for label, path in sources:
             _add_plugin_folder(handle, label, path)
         xbmcplugin.addSortMethod(handle, xbmcplugin.SORT_METHOD_LABEL)
@@ -2005,6 +2102,8 @@ def run_plugin():
     path = (params.get('path') or [''])[0]
     if action == 'launch':
         _plugin_launch(handle, path)
+    elif action == 'add_source':
+        _plugin_add_source(handle)
     else:
         _plugin_listing(handle, path if action == 'browse' else '')
 
