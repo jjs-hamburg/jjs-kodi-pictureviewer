@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="script.jjs.pictureviewer"
        name="JJS Kodi Picture Viewer"
-       version="0.1.50"
+       version="0.1.51"
        provider-name="JJS">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
@@ -13,9 +13,9 @@
   </extension>
   <extension point="xbmc.addon.metadata">
     <summary lang="de_DE">Schneller, fernbedienungstauglicher Bildbetrachter</summary>
-    <description lang="de_DE">Schneller, fernbedienungstauglicher Kodi-Bildbetrachter mit Galerie- und Vollbildmodus, Hintergrund, weißem Rand, Schlagschatten, Diashow, Bildvorladen und mehreren Übergängen einschließlich Diaprojektor-Effekt. Version 0.1.50 stellt die Viewer-Oberfläche auf Englisch um, setzt die neuen Standardwerte und verwendet den ausgewählten blau strukturierten Standardhintergrund. Die Auswahl eigener Hintergründe startet bei Kodis normalen Dateimanager-Quellen.</description>
+    <description lang="de_DE">Schneller, fernbedienungstauglicher Kodi-Bildbetrachter mit Galerie- und Vollbildmodus, Hintergrund, weißem Rand, Schlagschatten, Diashow, Bildvorladen und mehreren Übergängen einschließlich Diaprojektor-Effekt. Version 0.1.51 finalisiert den öffentlichen Stand mit englischer Viewer-Oberfläche, den neuen Standardwerten sowie dem ausgewählten blau strukturierten Standardhintergrund und README-Screenshot. Die Auswahl eigener Hintergründe startet bei Kodis normalen Dateimanager-Quellen.</description>
     <summary lang="en_GB">Fast remote-friendly picture viewer</summary>
-    <description lang="en_GB">Fast, remote-friendly Kodi picture viewer with gallery and fullscreen modes, configurable background, white border, strong drop shadow, slideshow controls, one-image preloading and multiple transitions including a projector-style push effect. Version 0.1.50 switches the viewer UI to English, adopts the new public-release defaults and uses the selected blue textured default background. Custom background selection starts from Kodi's normal File Manager sources.</description>
+    <description lang="en_GB">Fast, remote-friendly Kodi picture viewer with gallery and fullscreen modes, configurable background, white border, strong drop shadow, slideshow controls, one-image preloading and multiple transitions including a projector-style push effect. Version 0.1.51 finalizes the public-ready build with an English viewer UI, the new default settings, the selected blue textured default background and the README screenshot. Custom background selection starts from Kodi's normal File Manager sources.</description>
     <platform>all</platform>
     <license>GNU GENERAL PUBLIC LICENSE Version 2</license>
   </extension>
