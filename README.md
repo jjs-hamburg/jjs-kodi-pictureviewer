@@ -2,7 +2,7 @@
 
 # JJS Kodi Picture Viewer
 
-**Current version: 0.1.50**
+**Current version: 0.1.51**
 
 JJS Kodi Picture Viewer is a fast, remote-friendly picture viewer for Kodi, designed especially for large local folders and network shares.
 
