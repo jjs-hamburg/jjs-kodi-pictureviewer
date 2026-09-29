@@ -675,11 +675,11 @@ def _shadow_with_opacity(width, height, opacity):
     with Image.open(SHADOW_TEXTURE) as src:
         shadow = _nine_slice(src, width, height, 70)
 
-    # The source texture is deliberately soft. Scale its alpha beyond the
-    # source maximum so that 100 % in the UI is a genuinely dark shadow while
-    # preserving the same width, offset and soft falloff.
+    # The source texture is deliberately soft. Scale its alpha well beyond the
+    # source maximum so that even on a medium-bright background 100 % in the UI
+    # produces a clearly black shadow while preserving width, offset and falloff.
     opacity = max(0, min(100, int(opacity)))
-    strength = (opacity / 100.0) * 1.85
+    strength = (opacity / 100.0) * 2.70
     alpha = shadow.getchannel('A').point(lambda a: min(255, int(a * strength)))
     shadow.putalpha(alpha)
     return shadow
