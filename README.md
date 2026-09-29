@@ -1,209 +1,140 @@
+![JJS Kodi Picture Viewer](docs/pictureviewer.jpg)
+
 # JJS Kodi Picture Viewer
 
-**Aktueller Stand: 0.1.43**
+**Current version: 0.1.50**
 
-JJS Kodi Picture Viewer ist ein schneller, fernbedienungstauglicher Bildbetrachter für Kodi. Er benutzt zum Browsen weiterhin Kodis normales **Bilder-Fenster**, öffnet ein ausgewähltes Bild aber in einem eigenen Viewer. Dadurch wird nicht Kodis native Slideshow gestartet und der Ordner wird beim Öffnen eines Bildes nicht komplett vorgeladen.
+JJS Kodi Picture Viewer is a fast, remote-friendly picture viewer for Kodi, designed especially for large local folders and network shares.
 
-Der Viewer ist auf große Bildordner und Netzwerkquellen ausgelegt, zeigt immer nur das aktuelle Bild an und kann optional genau **ein Folgebild vorladen**. Galerie- und Vollbilddarstellung, Diashow, Hintergrund, weißer Rand, Schatten und mehrere Übergänge lassen sich direkt im linken Seitenmenü einstellen.
+Browsing takes place inside Kodi's Pictures window through the add-on source. Selecting an image opens the dedicated JJS viewer instead of Kodi's native slideshow, avoiding full-folder slideshow preloading. The viewer keeps only the current image and, optionally, exactly one next image prepared in the background.
+
+## Highlights
+
+- Gallery and fullscreen display modes
+- Fast one-image navigation with Left / Right
+- Slideshow control with Up / Down
+- Optional one-image look-ahead preloading
+- Configurable background, white border and drop shadow
+- Custom background selection through Kodi's normal File Manager sources
+- Multiple transitions, including the projector-style push transition
+- EXIF orientation handling
+- Session cache for already decoded images
+- Designed for SMB, NFS and other large network picture folders
+- Exact cursor return to the last displayed image when leaving the viewer
 
 ## Installation
 
-Das installierbare Kodi-ZIP wird automatisch aus dem Quellstand dieses Repositories erzeugt und als **GitHub Release** veröffentlicht.
+The installable Kodi ZIP is built automatically from this repository and published under **Releases**.
 
-1. Auf der Repository-Seite **Releases** öffnen.
-2. Den gewünschten Release auswählen.
-3. Unter **Assets** direkt `script.jjs.pictureviewer-<Version>.zip` herunterladen.
-4. In Kodi **Add-ons → Aus ZIP-Datei installieren** wählen und genau diese Datei installieren.
+1. Open **Releases** on this repository.
+2. Download **script.jjs.pictureviewer-<version>.zip**.
+3. In Kodi, choose **Add-ons → Install from zip file**.
+4. Select the downloaded ZIP.
 
-Der Build erzeugt bewusst **kein zusätzliches GitHub-Actions-Artifact**, weil GitHub Artifacts selbst wiederum als ZIP heruntergeladen werden und dadurch ein unnötiges Doppel-ZIP entstehen würde.
+Requirements:
 
-Das Add-on benötigt Kodi mit Python 3 (`xbmc.python >= 3.0.0`) und das Kodi-Modul `script.module.pil >= 5.1.0`. Beide Abhängigkeiten sind in `addon.xml` deklariert.
+- Kodi with Python 3 (xbmc.python >= 3.0.0)
+- script.module.pil >= 5.1.0
 
-## Start und Bildauswahl
+Both dependencies are declared in addon.xml.
 
-Beim normalen Start aktiviert JJS Kodi Picture Viewer Kodis originales **Bilder-Fenster** und stellt dort eine JJS-Bildquelle bereit. Die oberste Ebene zeigt die in Kodi eingerichteten Bildquellen. Ordner und Bilder werden im normalen Kodi-Bilderbrowser angezeigt und können wie gewohnt mit der eingestellten Ansicht und dem Kodi-Seitenmenü durchsucht werden.
+## Picture sources
 
-Ein Klick auf ein Bild startet direkt den JJS Viewer. Kodis natives Slideshow-Fenster wird dabei nicht geöffnet.
+The add-on browser shows the normal Kodi picture sources.
 
-Unterstützte Dateiendungen:
+Use **Manage Kodi picture sources…** at the top level to switch to Kodi's native picture-source management. Adding, editing or removing a source there changes Kodi's normal picture sources.
 
-`.jpg`, `.jpeg`, `.png`, `.webp`, `.bmp`, `.gif`, `.tif`, `.tiff`
+The custom-background file picker starts from Kodi's normal **File Manager sources**, so local drives and configured network locations are directly accessible.
 
-Die zuletzt im Kodi-Bilderfenster gelistete und sortierte Bildliste wird zwischengespeichert. Wird unmittelbar danach ein Bild geöffnet, kann der Viewer diese Liste wiederverwenden und muss einen großen NAS-/SMB-/NFS-Ordner nicht ein zweites Mal einlesen. Der Listen-Cache ist maximal 30 Minuten gültig.
+Supported image extensions: .jpg, .jpeg, .png, .webp, .bmp, .gif, .tif, .tiff.
 
-Beim Verlassen des Viewers wird der Cursor im Kodi-Bilderfenster auf das **zuletzt tatsächlich angezeigte Bild** zurückgesetzt. Dafür wird der exakte Bildpfad verwendet, nicht eine berechnete Listenposition.
+## Controls
 
-## Bedienung im Viewer
-
-| Taste / Aktion | Funktion |
+| Remote / key action | Function |
 | --- | --- |
-| **Links** | Vorheriges Bild |
-| **Rechts** | Nächstes Bild |
-| **Hoch** | Diashow starten; bei laufender Diashow Pause/Fortsetzen |
-| **Runter** | Diashow stoppen |
-| **OK / Select** | Linkes Seitenmenü öffnen |
-| **Context Menu** | Linkes Seitenmenü öffnen; bei geöffnetem Menü wieder schließen |
-| **Back / Zurück** | Viewer schließen und in die Kodi-Bilderliste zurückkehren |
+| **Left** | Previous image |
+| **Right** | Next image |
+| **Up** | Start slideshow; pause/resume while running |
+| **Down** | Stop slideshow |
+| **OK / Select** | Open the left settings menu |
+| **Context Menu** | Open the settings menu; close it when already open |
+| **Back** | Close the viewer and return to the Kodi picture list |
 
-Links und Rechts bewegen sich immer um **genau ein Bild**. Die Navigation ist zirkulär: hinter dem letzten Bild folgt wieder das erste und vor dem ersten das letzte.
+Left and Right always move by exactly one image. Navigation wraps around at the beginning and end of the folder.
 
-Die frühere Sprungweiten-Funktion existiert seit 0.1.35 nicht mehr. Hoch und Runter sind fest für die Diashow reserviert.
+Play/Pause and Stop media keys are deliberately **not intercepted** by the Picture Viewer, so they remain available for normal Kodi media and music playback.
 
-### Diashow-Statussymbole
+## Default settings
 
-Beim Starten oder Fortsetzen wird das Play-Symbol für etwa zwei Sekunden eingeblendet. Während einer Pause bleibt das Pause-Symbol sichtbar. Beim Stoppen erscheint das Stop-Symbol für etwa zwei Sekunden.
+A fresh installation starts with:
 
-Pause und Stop brechen einen bereits laufenden Bildübergang nicht mitten in der Animation ab. Die laufende Animation wird sauber beendet; nur der automatische Bildwechsel wird angehalten.
-
-## Seitenmenü und Einstellungen
-
-Alle Viewer-Einstellungen liegen im linken Seitenmenü und werden dauerhaft in
-
-`special://profile/addon_data/script.jjs.pictureviewer/viewer_settings.json`
-
-gespeichert. Änderungen an Darstellung, Rand oder Schatten werden auf Basis des bereits dekodierten Bildes neu gerendert; das Originalbild muss dafür normalerweise nicht erneut vom NAS gelesen werden.
-
-### Darstellung
-
-| Option | Werte | Neuinstallations-Default | Bedeutung |
-| --- | --- | --- | --- |
-| **Darstellung** | Galerie / Vollbild | **Galerie** | Galerie zeigt das Bild vor einem wählbaren Hintergrund. Vollbild nutzt die gesamte 1920×1080-Viewerfläche unter Beibehaltung des Seitenverhältnisses und deaktiviert Rand/Schatten/Hintergrunddarstellung. |
-| **Galeriegröße** | 60, 65, 70, 75, 80, 82, 85, 88, 90, 92, 95 % | **85 %** | Maximale Fläche für Bild plus Rand in der Galerieansicht. |
-| **Hintergrund** | PictureViewer Default / Skin-Wallpaper / Schwarz / Eigenes Bild | **PictureViewer Default** | Hintergrund der Galerieansicht. |
-| **Eigenes Hintergrundbild** | Bilddatei | mitgeliefertes Defaultbild | Wählt ein eigenes Hintergrundbild und schaltet automatisch auf „Eigenes Bild“. |
-
-**PictureViewer Default** ist das mitgelieferte Hintergrundbild und kann jederzeit wieder ausgewählt werden. **Skin-Wallpaper** versucht das aktuelle Hintergrundbild des verwendeten Skins zu übernehmen; bei Confluence/Confluence Custom werden auch die dort verwendeten Custom-Background-Einstellungen berücksichtigt.
-
-### Weißer Rand
-
-| Option | Bereich | Default |
-| --- | ---: | ---: |
-| **Weißer Rand** | Ein / Aus | **Ein** |
-| **Randbreite** | 0–100 px | **10 px** |
-
-Der Rand wird nur in der Galerieansicht verwendet.
-
-### Schatten
-
-| Option | Bereich | Default |
-| --- | ---: | ---: |
-| **Schatten** | Ein / Aus | **Ein** |
-| **Schattenbreite** | 0–150 px | **24 px** |
-| **Schattenversatz** | 0–100 px | **30 px** |
-| **Schattenstärke** | 0–100 % | **90 %** |
-
-Auch der Schatten wird nur in der Galerieansicht verwendet.
-
-### Diashow
-
-| Option | Werte / Bereich | Default |
-| --- | --- | --- |
-| **Diashow** | Starten / Stoppen | gestoppt |
-| **Diashow-Intervall** | 1–3600 s | **5 s** |
-| **Nächstes Bild vorladen** | Ein / Aus | **Ein** |
-
-Beim Starten oder Fortsetzen erhält das aktuell sichtbare Bild immer ein vollständiges neues Intervall.
-
-Das Vorladen arbeitet im Hintergrund und betrifft höchstens das nächste Bild. Die Navigation wartet niemals synchron auf einen laufenden Prefetch. Falls das Vorladen eines Bildes festhängt, wird es nach **12 Sekunden** für die aktuelle Viewer-Sitzung als defekt behandelt. Solange der festhängende Worker noch lebt, wird weiteres Prefetching vorübergehend deaktiviert, damit keine blockierten Threads angesammelt werden.
-
-Auch normale Lese- oder Dekodierfehler markieren ein Bild nur für die aktuelle Viewer-Sitzung als defekt. Bei Links/Rechts wird dann automatisch zum nächsten verwendbaren Bild weitergesprungen.
-
-### Bildübergang
-
-Verfügbare Übergänge:
-
-- **Aus**
-- **Überblenden**
-- **Sanftes Zoom**
-- **Einschieben**
-- **Diaprojektor** — Default
-
-Verfügbare Übergangsdauern:
-
-`120`, `180`, `250`, `350`, `500`, `700`, `1000`, `1500 ms`
-
-Neuinstallations-Default ist **Diaprojektor / 700 ms**.
-
-Der Diaprojektor-Effekt verwendet getrennte Bild- und Ghost-Layer für ein stabiles Herausschieben des alten und Hereinschieben des neuen Bildes. Seit 0.1.42 wird die abschließende Transition-Bereinigung ausschließlich im WindowXML-GUI-Thread ausgeführt; damit wird der Deadlock vermieden, der zuvor sporadisch zu einer dauerhaft leeren Bildfläche führen konnte.
-
-## Musik und Media-Tasten
-
-Die vorgesehene Bedienung der Diashow erfolgt **ausschließlich mit Hoch/Runter**:
-
-- **Hoch**: Diashow starten, pausieren oder fortsetzen.
-- **Runter**: Diashow stoppen.
-- **Links/Rechts**: manuell genau ein Bild zurück bzw. vor.
-
-**Play/Pause und Stop werden ab 0.1.43 vom Picture Viewer nicht mehr abgefangen.** Sie bleiben damit vollständig der normalen Kodi-Medien-/Musiksteuerung überlassen.
-
-Beim ersten Start von 0.1.43 werden außerdem die von älteren Versionen angelegten JJS-Media-Keymaps automatisch entfernt und Kodis Keymaps neu geladen. Für die Bild- und Diashowsteuerung verwendet der Viewer ausschließlich Hoch/Runter sowie Links/Rechts.
-
-## Performance und Stabilität
-
-Der Viewer rendert die Fotos intern auf eine 1920×1080-Fläche. Kodi skaliert diese auf die tatsächliche Ausgabeauflösung. EXIF-Orientierung wird beim Dekodieren berücksichtigt.
-
-Bereits dekodierte, EXIF-korrigierte Bilder werden während der Sitzung in einem kleinen RAM-Cache gehalten. Dadurch können Änderungen an Galeriegröße, Rand und Schatten ohne erneutes Lesen der Originaldatei dargestellt werden.
-
-Die dynamischen Foto-/Projektor-Flächen laden die bereits lokal gerenderten PNGs über Kodis normalen Texture-Loader. Nur das Hintergrundbild verwendet den Large-Texture-Background-Loader.
-
-Version 0.1.42 beseitigt den bislang kritischsten sporadischen Fehler: Die Diaprojektor-Bereinigung führt keine synchronen GUI-Property-Aufrufe mehr aus dem Timerthread aus. Stattdessen übergibt der Timer eine interne Action an den WindowXML-Thread; eine Transition-Seriennummer verhindert zusätzlich, dass eine verspätete Cleanup-Action eine neuere Animation beendet.
-
-## Neuinstallations-Defaults
-
-Eine frische Installation startet mit:
-
-| Einstellung | Wert |
+| Setting | Default |
 | --- | --- |
-| Darstellung | Galerie |
-| Galeriegröße | 85 % |
-| Hintergrund | PictureViewer Default |
-| Weißer Rand | Ein |
-| Randbreite | 10 px |
-| Schatten | Ein |
-| Schattenbreite | 24 px |
-| Schattenversatz | 30 px |
-| Schattenstärke | 90 % |
-| Diashow-Intervall | 5 s |
-| Nächstes Bild vorladen | Ein |
-| Übergang | Diaprojektor |
-| Übergangsdauer | 700 ms |
+| Display mode | **Gallery** |
+| Gallery size | **85%** |
+| Background | **Picture Viewer Default** |
+| White border | **On** |
+| Border width | **10 px** |
+| Shadow | **On** |
+| Shadow width | **26 px** |
+| Shadow offset | **30 px** |
+| Shadow strength | **60%** |
+| Slideshow interval | **5 s** |
+| Preload next image | **On** |
+| Transition | **Projector** |
+| Transition duration | **700 ms** |
 
-Beim Update einer bestehenden Installation werden gespeicherte Benutzereinstellungen grundsätzlich beibehalten. Die Versionsmigrationen ändern nur Einstellungen, die für eine bestimmte alte Default-Konfiguration oder eine entfernte Funktion eindeutig identifiziert werden können.
+Existing user settings are preserved during updates. Migrations only change settings when they can be identified as an exact former default.
 
-## Projektstruktur
+## Backgrounds and gallery appearance
 
-Der installierbare Add-on-Baum liegt vollständig unter:
+**Picture Viewer Default** uses the bundled blue textured background shown in the screenshot above.
 
-`script.jjs.pictureviewer/`
+Other background choices are Skin wallpaper, Black, and Custom image.
 
-Damit entspricht die Verzeichnisstruktur im Repository direkt der Struktur im Kodi-Installations-ZIP.
+The gallery can optionally render a white border and a soft black drop shadow. Shadow width, offset and strength are independently adjustable.
 
-Wichtige Dateien:
+## Slideshow and transitions
 
-- `addon.xml` — Add-on-ID, Version, Abhängigkeiten und Kodi-Metadaten
-- `default.py` — Einstiegspunkt
-- `resources/lib/viewer.py` — Browser-/Viewer-/Rendering-/Slideshow-Logik
-- `resources/skins/Default/1080i/PictureViewer.xml` — WindowXML-Oberfläche und Übergangsanimationen
-- `resources/media/` — Hintergrund und Medienressourcen
-- `README.txt` — historische Versionsnotizen des Add-ons
+Available transitions are Off, Fade, Gentle zoom, Slide, and Projector.
 
-## Build
+Available transition durations are 120, 180, 250, 350, 500, 700, 1000 and 1500 ms.
 
-Der Workflow `.github/workflows/build-addon.yml` prüft unter anderem:
+The **Projector** transition is the default.
 
-- Add-on-ID und Versionsnummer aus `addon.xml`
-- Python-Syntax
-- Vorhandensein der erforderlichen Laufzeitdateien
-- korrekte ZIP-Struktur mit `script.jjs.pictureviewer/` als oberstem Add-on-Ordner
+When the slideshow starts or resumes, a Play icon is shown briefly. Pause remains visible while paused, and Stop is shown briefly when the slideshow is stopped. An in-progress transition is allowed to finish cleanly before the slideshow state changes.
 
-Das direkt in Kodi installierbare Release-Asset heißt:
+## Performance
 
-`script.jjs.pictureviewer-<Version>.zip`
+The viewer renders to a 1920×1080 canvas while preserving each picture's aspect ratio.
 
-Es wird ohne zusätzliche ZIP-Hülle unter **Releases → Assets** veröffentlicht.
+Already decoded, EXIF-corrected images are kept in a small session RAM cache. This lets changes to gallery size, border or shadow be rerendered without rereading the original image from the NAS.
 
-## Versionshistorie
+The most recently displayed Kodi picture-folder listing is cached for up to 30 minutes. When an image is opened from that listing, the viewer can reuse the exact sorted list instead of scanning the folder again.
 
-Die ursprüngliche, fortlaufend gepflegte technische Versionshistorie befindet sich unverändert in `script.jjs.pictureviewer/README.txt`.
+Optional preloading handles only the next image. Navigation never waits synchronously for an in-flight prefetch. A blocked prefetch is abandoned after 12 seconds so navigation remains responsive.
 
-Der aktuelle Stand dieses Repositories ist **0.1.43 – Media-Tasten wieder vollständig Kodi/Musik überlassen; 0.1.42-Deadlock-Fix unverändert enthalten**.
+## Project structure
+
+The complete installable add-on lives under **script.jjs.pictureviewer/**.
+
+Important files:
+
+- addon.xml — add-on metadata and dependencies
+- default.py — entry point
+- resources/lib/viewer.py — browser, viewer, rendering and slideshow logic
+- resources/skins/Default/1080i/PictureViewer.xml — WindowXML UI and transition animations
+- resources/media/defaultBackground.jpg — bundled default background
+- docs/pictureviewer.jpg — README screenshot
+
+## Build and releases
+
+The GitHub Actions workflow validates Python and XML syntax, checks required runtime files, creates the directly installable Kodi ZIP and publishes it as a GitHub Release.
+
+The release asset is **script.jjs.pictureviewer-<version>.zip**. No additional ZIP wrapper is used.
+
+## License
+
+GNU General Public License Version 2.
+
+This is an independent, unofficial Kodi add-on.
