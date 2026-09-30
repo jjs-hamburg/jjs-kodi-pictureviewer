@@ -169,12 +169,27 @@ PICTURE_VIEW_IDS = (50, 51, 550, 551, 500, 514, 510)
 CTRL_BG_BLACK = 1001
 CTRL_BG_IMAGE = 1002
 CTRL_SHADOW = 1003
+CTRL_SHADOW_2 = 1013
+CTRL_SHADOW_3 = 1014
 CTRL_FRAME = 1004
 CTRL_PHOTO_A = 1005
 CTRL_STATUS = 1006
 CTRL_PHOTO_B = 1007
 CTRL_PROJECTOR_GHOST_A = 1008
 CTRL_PROJECTOR_GHOST_B = 1009
+CTRL_SHADOW_B = 1015
+CTRL_SHADOW_B2 = 1016
+CTRL_SHADOW_B3 = 1017
+CTRL_FRAME_B = 1018
+CTRL_SHADOW_GA = 1019
+CTRL_SHADOW_GA2 = 1020
+CTRL_SHADOW_GA3 = 1021
+CTRL_FRAME_GA = 1022
+CTRL_SHADOW_GB = 1023
+CTRL_SHADOW_GB2 = 1024
+CTRL_SHADOW_GB3 = 1025
+CTRL_FRAME_GB = 1026
+CTRL_NATIVE_PRELOAD = 1027
 CTRL_DUMMY_FOCUS = 9900
 
 BTN_MODE = 9101
@@ -195,6 +210,10 @@ BTN_TRANSITION_DURATION = 9116
 
 CANVAS_W = 1920
 CANVAS_H = 1080
+
+# Direct-source renderer: Kodi receives the original source image directly.
+# Pillow/temp-file compositing is bypassed; border and shadow are native controls.
+DIRECT_SOURCE_RENDERER = True
 
 DEFAULTS = {
     'settings_version': 13,
@@ -921,6 +940,8 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.previous_slot = None
         self.current_render_path = ''
         self.previous_render_path = ''
+        self.direct_current_path = ''
+        self.direct_current_geometry = None
         self.render_serial = 0
         self.prefetch = None
         self.prefetch_inflight = None
@@ -959,11 +980,26 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.bg_black = self.getControl(CTRL_BG_BLACK)
         self.bg_image = self.getControl(CTRL_BG_IMAGE)
         self.shadow_img = self.getControl(CTRL_SHADOW)
+        self.shadow_img_2 = self.getControl(CTRL_SHADOW_2)
+        self.shadow_img_3 = self.getControl(CTRL_SHADOW_3)
         self.frame_img = self.getControl(CTRL_FRAME)
         self.photo_a = self.getControl(CTRL_PHOTO_A)
         self.photo_b = self.getControl(CTRL_PHOTO_B)
         self.projector_ghost_a = self.getControl(CTRL_PROJECTOR_GHOST_A)
         self.projector_ghost_b = self.getControl(CTRL_PROJECTOR_GHOST_B)
+        self.shadow_b = self.getControl(CTRL_SHADOW_B)
+        self.shadow_b2 = self.getControl(CTRL_SHADOW_B2)
+        self.shadow_b3 = self.getControl(CTRL_SHADOW_B3)
+        self.frame_b = self.getControl(CTRL_FRAME_B)
+        self.shadow_ga = self.getControl(CTRL_SHADOW_GA)
+        self.shadow_ga2 = self.getControl(CTRL_SHADOW_GA2)
+        self.shadow_ga3 = self.getControl(CTRL_SHADOW_GA3)
+        self.frame_ga = self.getControl(CTRL_FRAME_GA)
+        self.shadow_gb = self.getControl(CTRL_SHADOW_GB)
+        self.shadow_gb2 = self.getControl(CTRL_SHADOW_GB2)
+        self.shadow_gb3 = self.getControl(CTRL_SHADOW_GB3)
+        self.frame_gb = self.getControl(CTRL_FRAME_GB)
+        self.native_preload = self.getControl(CTRL_NATIVE_PRELOAD)
         self.status = self.getControl(CTRL_STATUS)
         self.clearProperty('JJSMenu')
         self.clearProperty('JJSPhotoLayer')
@@ -1068,6 +1104,144 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             photo.setHeight(CANVAS_H)
         self.frame_img.setVisible(False)
         self.shadow_img.setVisible(False)
+
+    def _configure_direct_unit(self, photo, frame, shadows, path, geometry,
+                               frame_geometry, shadow_geometry, shadow_strength):
+        x, y, width, height = geometry
+        photo.setPosition(x, y)
+        photo.setWidth(width)
+        photo.setHeight(height)
+        photo.setImage(path, useCache=True)
+
+        fx, fy, fw, fh, frame_visible = frame_geometry
+        frame.setPosition(fx, fy)
+        frame.setWidth(fw)
+        frame.setHeight(fh)
+        frame.setVisible(frame_visible)
+
+        sx, sy, sw, sh, shadow_visible = shadow_geometry
+        alpha = max(0, min(255, int(round(255.0 * shadow_strength / 100.0))))
+        diffuse = '0x%02XFFFFFF' % alpha
+        for shadow in shadows:
+            shadow.setPosition(sx, sy)
+            shadow.setWidth(sw)
+            shadow.setHeight(sh)
+            shadow.setImage(SHADOW_TEXTURE, useCache=False)
+            try:
+                shadow.setColorDiffuse(diffuse)
+            except Exception:
+                pass
+            shadow.setVisible(shadow_visible and shadow_strength > 0)
+
+    def _preload_direct_source(self, index, direction=1):
+        """Ask Kodi to decode/cache the next original image before it is animated."""
+        if not self.images or len(self.images) < 2:
+            self.native_preload.setImage('')
+            return
+        candidate = self._next_usable_index(index, 1 if direction >= 0 else -1)
+        if candidate == index:
+            self.native_preload.setImage('')
+            return
+        try:
+            _name, next_path = self.images[candidate]
+            # The 1x1 control is covered by the normal viewer layers but remains
+            # renderable, so Kodi can populate its texture cache ahead of time.
+            self.native_preload.setImage(next_path, useCache=True)
+        except Exception as exc:
+            _log('Native preload failed: %r' % (exc,), xbmc.LOGWARNING)
+
+    def _display_direct_source(self, index, animate=True, direction=1):
+        """Display original source; photo, border and shadow animate as one visual unit."""
+        name, path = self.images[index]
+        self._apply_background()
+        dims = self._dimensions(path) or (CANVAS_W, CANVAS_H)
+
+        if self.settings['display_mode'] == 'fullscreen':
+            border = 0
+            max_w, max_h = CANVAS_W, CANVAS_H
+            shadow_width = shadow_offset = 0
+        else:
+            pct = max(50, min(98, int(self.settings['gallery_percent']))) / 100.0
+            outer_w, outer_h = int(CANVAS_W * pct), int(CANVAS_H * pct)
+            border = max(0, int(self.settings['border_width'])) if self.settings['white_border'] else 0
+            max_w, max_h = max(1, outer_w - 2 * border), max(1, outer_h - 2 * border)
+            shadow_width = max(0, int(self.settings['shadow_width'])) if self.settings['shadow'] else 0
+            shadow_offset = int(self.settings['shadow_offset']) if self.settings['shadow'] else 0
+
+        img_w, img_h = fit_rect(dims[0], dims[1], max_w, max_h)
+        frame_w, frame_h = img_w + 2 * border, img_h + 2 * border
+        frame_x, frame_y = (CANVAS_W - frame_w) // 2, (CANVAS_H - frame_h) // 2
+        geometry = (frame_x + border, frame_y + border, img_w, img_h)
+        frame_geometry = (frame_x, frame_y, frame_w, frame_h,
+                          self.settings['display_mode'] == 'gallery' and border > 0)
+        shadow_geometry = (
+            frame_x - shadow_width + shadow_offset,
+            frame_y - shadow_width + shadow_offset,
+            frame_w + 2 * shadow_width,
+            frame_h + 2 * shadow_width,
+            self.settings['display_mode'] == 'gallery' and
+            bool(self.settings['shadow']) and shadow_width > 0)
+        strength = max(0, min(100, int(self.settings['shadow_opacity'])))
+
+        target_layer = 'A' if self.active_photo_layer != 'A' else 'B'
+        if target_layer == 'A':
+            target_unit = (self.photo_a, self.frame_img,
+                           (self.shadow_img, self.shadow_img_2, self.shadow_img_3))
+        else:
+            target_unit = (self.photo_b, self.frame_b,
+                           (self.shadow_b, self.shadow_b2, self.shadow_b3))
+        self._configure_direct_unit(*target_unit, path, geometry, frame_geometry,
+                                    shadow_geometry, strength)
+
+        mode = self._transition_mode() if animate and self.active_photo_layer else 'none'
+        duration_ms = self._transition_duration_ms()
+
+        if mode == 'projector' and self.direct_current_path and self.direct_current_geometry:
+            old = self.direct_current_geometry
+            shift = -CANVAS_W if direction >= 0 else CANVAS_W
+            og = (old['geometry'][0] + shift, old['geometry'][1],
+                  old['geometry'][2], old['geometry'][3])
+            of = (old['frame'][0] + shift, old['frame'][1], old['frame'][2],
+                  old['frame'][3], old['frame'][4])
+            os = (old['shadow'][0] + shift, old['shadow'][1], old['shadow'][2],
+                  old['shadow'][3], old['shadow'][4])
+            self._configure_direct_unit(
+                self.projector_ghost_a, self.frame_ga,
+                (self.shadow_ga, self.shadow_ga2, self.shadow_ga3),
+                self.direct_current_path, og, of, os, old['strength'])
+            self._configure_direct_unit(
+                self.projector_ghost_b, self.frame_gb,
+                (self.shadow_gb, self.shadow_gb2, self.shadow_gb3),
+                path, geometry, frame_geometry, shadow_geometry, strength)
+
+        with self.transition_lock:
+            self.transition_serial += 1
+            self.transition_settle_queued_serial = 0
+            self.transition_settle_queued_at = 0.0
+            self.setProperty('JJSTransitionDir', 'next' if direction >= 0 else 'prev')
+            self.setProperty('JJSTransitionMs', str(duration_ms))
+            if mode == 'projector' and self.direct_current_path and self.direct_current_geometry:
+                self.pending_projector_layer = target_layer
+                self.setProperty('JJSTransitionMode', 'projector')
+                self.setProperty('JJSProjectorActive', '1')
+            else:
+                self.pending_projector_layer = ''
+                self.setProperty('JJSProjectorActive', '0')
+                self.setProperty('JJSTransitionMode', mode)
+                self.setProperty('JJSPhotoLayer', target_layer)
+                self.active_photo_layer = target_layer
+            self.transition_until = time.monotonic() + (
+                (duration_ms + 45) / 1000.0 if mode != 'none' else 0.0)
+
+        self.direct_current_path = path
+        self.direct_current_geometry = {
+            'geometry': geometry, 'frame': frame_geometry, 'shadow': shadow_geometry,
+            'strength': strength
+        }
+        self.status.setLabel('%d / %d   %s' % (index + 1, len(self.images), name))
+        self.last_change = time.monotonic()
+        self._preload_direct_source(index, direction)
+        return True
 
     def _transition_mode(self):
         mode = str(self.settings.get('transition_mode', 'fade') or 'fade')
@@ -1240,6 +1414,15 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             return False
         target = self.index
 
+        if DIRECT_SOURCE_RENDERER:
+            try:
+                return self._display_direct_source(target, animate=animate, direction=direction)
+            except Exception as exc:
+                self._mark_bad_image(target, repr(exc))
+                _log('Direct-source display failed %s: %r' % (self.images[target][1], exc),
+                     xbmc.LOGERROR)
+                return False
+
         cached = self._take_prefetch(target)
         if cached:
             self._display_rendered(target, cached['path'], cached['slot'], animate=animate, direction=direction)
@@ -1268,6 +1451,8 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         return True
 
     def _kick_prefetch(self):
+        if DIRECT_SOURCE_RENDERER:
+            return
         if self.closing or not self.images or len(self.images) < 2:
             return
         if self.prefetch_disabled_session:
