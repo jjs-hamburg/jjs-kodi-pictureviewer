@@ -1082,20 +1082,59 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         return min(allowed, key=lambda item: abs(item - value))
 
     def _switch_photo_layer(self, rendered, animate=True, direction=1):
-        """0.1.58 diagnostic: single unconditional image layer.
+        """Display a finished render through the stable A/B pipeline.
 
-        This intentionally bypasses the A/B layer switch, projector ghost layers,
-        visibility-property switching and transition animations.  It isolates the
-        WindowXMLDialog image-control/setImage path without changing source decode
-        or the 1920x1080 render pipeline.
+        Fade/zoom/slide continue to flip the persistent A/B layers directly.
+        Projector is deliberately different: A/B stay frozen while two temporary
+        full-canvas overlays perform old-out/new-in.  Only after the animation
+        deadline is the hidden persistent layer committed to the new picture.
+        This prevents transient A/B/ghost overlap, especially when landscape and
+        portrait images alternate.
         """
-        self.setProperty('JJSProjectorActive', '0')
-        self.setProperty('JJSTransitionMode', 'none')
-        self.setProperty('JJSPhotoLayer', 'A')
-        self.pending_projector_layer = ''
-        self.active_photo_layer = 'A'
-        self.photo_a.setImage(rendered, useCache=False)
-        self.transition_until = time.monotonic()
+        target_layer = 'A' if self.active_photo_layer != 'A' else 'B'
+        target = self.photo_a if target_layer == 'A' else self.photo_b
+        mode = self._transition_mode() if animate and self.active_photo_layer else 'none'
+        duration_ms = self._transition_duration_ms()
+
+        # Preload the future persistent layer while it is still hidden.
+        target.setImage(rendered, useCache=False)
+
+        if mode == 'projector' and self.current_render_path:
+            # 1008 is the outgoing overlay, 1009 the incoming overlay.  Keep the
+            # outgoing control's *base* position off-screen in the direction it
+            # leaves. Kodi Visible animations return to the control's base
+            # position after they finish; an off-screen base prevents the old
+            # landscape picture from snapping back behind a portrait while the
+            # projector property is still true for a few cleanup milliseconds.
+            outgoing_base_x = -CANVAS_W if direction >= 0 else CANVAS_W
+            self.projector_ghost_a.setPosition(outgoing_base_x, 0)
+            self.projector_ghost_b.setPosition(0, 0)
+            self.projector_ghost_a.setImage(self.current_render_path, useCache=False)
+            self.projector_ghost_b.setImage(rendered, useCache=False)
+
+        with self.transition_lock:
+            # Every visual switch gets an identity.  A delayed internal settle
+            # action from an older transition must never terminate a newer one.
+            self.transition_serial += 1
+            self.transition_settle_queued_serial = 0
+            self.transition_settle_queued_at = 0.0
+            self.setProperty('JJSTransitionDir', 'next' if direction >= 0 else 'prev')
+            self.setProperty('JJSTransitionMs', str(duration_ms))
+
+            if mode == 'projector' and self.current_render_path:
+                self.pending_projector_layer = target_layer
+                self.setProperty('JJSTransitionMode', 'projector')
+                # This single visibility change hides persistent A/B and reveals
+                # both projector overlays simultaneously.
+                self.setProperty('JJSProjectorActive', '1')
+            else:
+                self.pending_projector_layer = ''
+                self.setProperty('JJSProjectorActive', '0')
+                self.setProperty('JJSTransitionMode', mode)
+                self.setProperty('JJSPhotoLayer', target_layer)
+                self.active_photo_layer = target_layer
+
+            self.transition_until = time.monotonic() + ((duration_ms + 45) / 1000.0 if mode != 'none' else 0.0)
 
     def _allocate_slot(self):
         # 0.1.10: tokens are monotonic and never reused during this viewer
@@ -1109,7 +1148,11 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         name, _path = self.images[index]
         self._apply_background()
         self._layout_current()
-        self._switch_photo_layer(rendered, animate=animate, direction=direction)
+        # 0.1.59 diagnostic: feed the original source image directly to Kodi's
+        # normal A/B image-control pipeline. The Pillow/render step still runs so
+        # only the texture source handed to setImage() changes.
+        _source_name, source_path = self.images[index]
+        self._switch_photo_layer(source_path, animate=animate, direction=direction)
 
         stale = self.previous_render_path
         self.previous_render_path = self.current_render_path

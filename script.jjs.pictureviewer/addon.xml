@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="script.jjs.pictureviewer"
        name="JJS Kodi Picture Viewer"
-       version="0.1.58"
+       version="0.1.59"
        provider-name="JJS">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
