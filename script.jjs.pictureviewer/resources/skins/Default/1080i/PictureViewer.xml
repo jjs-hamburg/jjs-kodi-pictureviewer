@@ -40,7 +40,7 @@
             <height>1080</height>
             <aspectratio>stretch</aspectratio>
             <texture/>
-            <visible>String.IsEqual(Window.Property(JJSPhotoLayer),A)+String.IsEqual(Window.Property(JJSProjectorActive),0)</visible>
+            <visible>true</visible>
             <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
                 <effect type="fade" start="0" end="100" time="120" tween="sine" easing="inout"/>
             </animation>
