@@ -177,6 +177,18 @@ CTRL_STATUS = 1006
 CTRL_PHOTO_B = 1007
 CTRL_PROJECTOR_GHOST_A = 1008
 CTRL_PROJECTOR_GHOST_B = 1009
+CTRL_SHADOW_B = 1015
+CTRL_SHADOW_B2 = 1016
+CTRL_SHADOW_B3 = 1017
+CTRL_FRAME_B = 1018
+CTRL_SHADOW_GA = 1019
+CTRL_SHADOW_GA2 = 1020
+CTRL_SHADOW_GA3 = 1021
+CTRL_FRAME_GA = 1022
+CTRL_SHADOW_GB = 1023
+CTRL_SHADOW_GB2 = 1024
+CTRL_SHADOW_GB3 = 1025
+CTRL_FRAME_GB = 1026
 CTRL_DUMMY_FOCUS = 9900
 
 BTN_MODE = 9101
@@ -974,6 +986,18 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.photo_b = self.getControl(CTRL_PHOTO_B)
         self.projector_ghost_a = self.getControl(CTRL_PROJECTOR_GHOST_A)
         self.projector_ghost_b = self.getControl(CTRL_PROJECTOR_GHOST_B)
+        self.shadow_b = self.getControl(CTRL_SHADOW_B)
+        self.shadow_b2 = self.getControl(CTRL_SHADOW_B2)
+        self.shadow_b3 = self.getControl(CTRL_SHADOW_B3)
+        self.frame_b = self.getControl(CTRL_FRAME_B)
+        self.shadow_ga = self.getControl(CTRL_SHADOW_GA)
+        self.shadow_ga2 = self.getControl(CTRL_SHADOW_GA2)
+        self.shadow_ga3 = self.getControl(CTRL_SHADOW_GA3)
+        self.frame_ga = self.getControl(CTRL_FRAME_GA)
+        self.shadow_gb = self.getControl(CTRL_SHADOW_GB)
+        self.shadow_gb2 = self.getControl(CTRL_SHADOW_GB2)
+        self.shadow_gb3 = self.getControl(CTRL_SHADOW_GB3)
+        self.frame_gb = self.getControl(CTRL_FRAME_GB)
         self.status = self.getControl(CTRL_STATUS)
         self.clearProperty('JJSMenu')
         self.clearProperty('JJSPhotoLayer')
@@ -1079,99 +1103,97 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.frame_img.setVisible(False)
         self.shadow_img.setVisible(False)
 
-    def _set_direct_geometry(self, control, geometry, path):
+    def _configure_direct_unit(self, photo, frame, shadows, path, geometry,
+                               frame_geometry, shadow_geometry, shadow_strength):
         x, y, width, height = geometry
-        control.setPosition(x, y)
-        control.setWidth(width)
-        control.setHeight(height)
-        control.setImage(path, useCache=False)
+        photo.setPosition(x, y)
+        photo.setWidth(width)
+        photo.setHeight(height)
+        photo.setImage(path, useCache=False)
+
+        fx, fy, fw, fh, frame_visible = frame_geometry
+        frame.setPosition(fx, fy)
+        frame.setWidth(fw)
+        frame.setHeight(fh)
+        frame.setVisible(frame_visible)
+
+        sx, sy, sw, sh, shadow_visible = shadow_geometry
+        alpha = max(0, min(255, int(round(255.0 * shadow_strength / 100.0))))
+        diffuse = '0x%02XFFFFFF' % alpha
+        for shadow in shadows:
+            shadow.setPosition(sx, sy)
+            shadow.setWidth(sw)
+            shadow.setHeight(sh)
+            shadow.setImage(SHADOW_TEXTURE, useCache=False)
+            try:
+                shadow.setColorDiffuse(diffuse)
+            except Exception:
+                pass
+            shadow.setVisible(shadow_visible and shadow_strength > 0)
 
     def _display_direct_source(self, index, animate=True, direction=1):
-        """Display the original source image; frame/shadow stay native Kodi controls."""
+        """Display original source; photo, border and shadow animate as one visual unit."""
         name, path = self.images[index]
         self._apply_background()
-
         dims = self._dimensions(path) or (CANVAS_W, CANVAS_H)
 
         if self.settings['display_mode'] == 'fullscreen':
             border = 0
-            max_w = CANVAS_W
-            max_h = CANVAS_H
-            shadow_width = 0
-            shadow_offset = 0
+            max_w, max_h = CANVAS_W, CANVAS_H
+            shadow_width = shadow_offset = 0
         else:
             pct = max(50, min(98, int(self.settings['gallery_percent']))) / 100.0
-            outer_w = int(CANVAS_W * pct)
-            outer_h = int(CANVAS_H * pct)
+            outer_w, outer_h = int(CANVAS_W * pct), int(CANVAS_H * pct)
             border = max(0, int(self.settings['border_width'])) if self.settings['white_border'] else 0
-            max_w = max(1, outer_w - 2 * border)
-            max_h = max(1, outer_h - 2 * border)
+            max_w, max_h = max(1, outer_w - 2 * border), max(1, outer_h - 2 * border)
             shadow_width = max(0, int(self.settings['shadow_width'])) if self.settings['shadow'] else 0
             shadow_offset = int(self.settings['shadow_offset']) if self.settings['shadow'] else 0
 
         img_w, img_h = fit_rect(dims[0], dims[1], max_w, max_h)
-        frame_w = img_w + 2 * border
-        frame_h = img_h + 2 * border
-        frame_x = (CANVAS_W - frame_w) // 2
-        frame_y = (CANVAS_H - frame_h) // 2
-        img_x = frame_x + border
-        img_y = frame_y + border
-        geometry = (img_x, img_y, img_w, img_h)
-
-        # Native frame.
-        if self.settings['display_mode'] == 'gallery' and border > 0:
-            self.frame_img.setPosition(frame_x, frame_y)
-            self.frame_img.setWidth(frame_w)
-            self.frame_img.setHeight(frame_h)
-            self.frame_img.setVisible(True)
-        else:
-            self.frame_img.setVisible(False)
-
-        # Native shadow. Three identical layers reproduce the stronger alpha scale
-        # that the old Pillow renderer applied to the soft source shadow texture.
-        shadow_controls = (self.shadow_img, self.shadow_img_2, self.shadow_img_3)
-        if (self.settings['display_mode'] == 'gallery' and self.settings['shadow']
-                and shadow_width > 0):
-            shadow_w = frame_w + 2 * shadow_width
-            shadow_h = frame_h + 2 * shadow_width
-            sx = frame_x - shadow_width + shadow_offset
-            sy = frame_y - shadow_width + shadow_offset
-            strength = max(0, min(100, int(self.settings['shadow_opacity'])))
-            alpha = max(0, min(255, int(round(255.0 * strength / 100.0))))
-            diffuse = '0x%02XFFFFFF' % alpha
-            for shadow in shadow_controls:
-                shadow.setPosition(sx, sy)
-                shadow.setWidth(shadow_w)
-                shadow.setHeight(shadow_h)
-                shadow.setImage(SHADOW_TEXTURE, useCache=False)
-                try:
-                    shadow.setColorDiffuse(diffuse)
-                except Exception:
-                    pass
-                shadow.setVisible(strength > 0)
-        else:
-            for shadow in shadow_controls:
-                shadow.setVisible(False)
+        frame_w, frame_h = img_w + 2 * border, img_h + 2 * border
+        frame_x, frame_y = (CANVAS_W - frame_w) // 2, (CANVAS_H - frame_h) // 2
+        geometry = (frame_x + border, frame_y + border, img_w, img_h)
+        frame_geometry = (frame_x, frame_y, frame_w, frame_h,
+                          self.settings['display_mode'] == 'gallery' and border > 0)
+        shadow_geometry = (
+            frame_x - shadow_width + shadow_offset,
+            frame_y - shadow_width + shadow_offset,
+            frame_w + 2 * shadow_width,
+            frame_h + 2 * shadow_width,
+            self.settings['display_mode'] == 'gallery' and
+            bool(self.settings['shadow']) and shadow_width > 0)
+        strength = max(0, min(100, int(self.settings['shadow_opacity'])))
 
         target_layer = 'A' if self.active_photo_layer != 'A' else 'B'
-        target = self.photo_a if target_layer == 'A' else self.photo_b
+        if target_layer == 'A':
+            target_unit = (self.photo_a, self.frame_img,
+                           (self.shadow_img, self.shadow_img_2, self.shadow_img_3))
+        else:
+            target_unit = (self.photo_b, self.frame_b,
+                           (self.shadow_b, self.shadow_b2, self.shadow_b3))
+        self._configure_direct_unit(*target_unit, path, geometry, frame_geometry,
+                                    shadow_geometry, strength)
+
         mode = self._transition_mode() if animate and self.active_photo_layer else 'none'
         duration_ms = self._transition_duration_ms()
 
-        self._set_direct_geometry(target, geometry, path)
-
         if mode == 'projector' and self.direct_current_path and self.direct_current_geometry:
-            ox, oy, ow, oh = self.direct_current_geometry
-            nx, ny, nw, nh = geometry
-            outgoing_base_x = ox - CANVAS_W if direction >= 0 else ox + CANVAS_W
-            self.projector_ghost_a.setPosition(outgoing_base_x, oy)
-            self.projector_ghost_a.setWidth(ow)
-            self.projector_ghost_a.setHeight(oh)
-            self.projector_ghost_a.setImage(self.direct_current_path, useCache=False)
-            self.projector_ghost_b.setPosition(nx, ny)
-            self.projector_ghost_b.setWidth(nw)
-            self.projector_ghost_b.setHeight(nh)
-            self.projector_ghost_b.setImage(path, useCache=False)
+            old = self.direct_current_geometry
+            shift = -CANVAS_W if direction >= 0 else CANVAS_W
+            og = (old['geometry'][0] + shift, old['geometry'][1],
+                  old['geometry'][2], old['geometry'][3])
+            of = (old['frame'][0] + shift, old['frame'][1], old['frame'][2],
+                  old['frame'][3], old['frame'][4])
+            os = (old['shadow'][0] + shift, old['shadow'][1], old['shadow'][2],
+                  old['shadow'][3], old['shadow'][4])
+            self._configure_direct_unit(
+                self.projector_ghost_a, self.frame_ga,
+                (self.shadow_ga, self.shadow_ga2, self.shadow_ga3),
+                self.direct_current_path, og, of, os, old['strength'])
+            self._configure_direct_unit(
+                self.projector_ghost_b, self.frame_gb,
+                (self.shadow_gb, self.shadow_gb2, self.shadow_gb3),
+                path, geometry, frame_geometry, shadow_geometry, strength)
 
         with self.transition_lock:
             self.transition_serial += 1
@@ -1179,7 +1201,6 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             self.transition_settle_queued_at = 0.0
             self.setProperty('JJSTransitionDir', 'next' if direction >= 0 else 'prev')
             self.setProperty('JJSTransitionMs', str(duration_ms))
-
             if mode == 'projector' and self.direct_current_path and self.direct_current_geometry:
                 self.pending_projector_layer = target_layer
                 self.setProperty('JJSTransitionMode', 'projector')
@@ -1190,12 +1211,14 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                 self.setProperty('JJSTransitionMode', mode)
                 self.setProperty('JJSPhotoLayer', target_layer)
                 self.active_photo_layer = target_layer
-
             self.transition_until = time.monotonic() + (
                 (duration_ms + 45) / 1000.0 if mode != 'none' else 0.0)
 
         self.direct_current_path = path
-        self.direct_current_geometry = geometry
+        self.direct_current_geometry = {
+            'geometry': geometry, 'frame': frame_geometry, 'shadow': shadow_geometry,
+            'strength': strength
+        }
         self.status.setLabel('%d / %d   %s' % (index + 1, len(self.images), name))
         self.last_change = time.monotonic()
         return True

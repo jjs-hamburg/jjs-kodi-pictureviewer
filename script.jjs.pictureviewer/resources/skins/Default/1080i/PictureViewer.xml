@@ -17,41 +17,7 @@
             <aspectratio>scale</aspectratio>
             <texture background="true"/>
         </control>
-        <control type="image" id="1003">
-            <left>0</left>
-            <top>0</top>
-            <width>1</width>
-            <height>1</height>
-            <texture border="70">shadow.png</texture>
-        </control>
-        <control type="image" id="1013">
-            <left>0</left>
-            <top>0</top>
-            <width>1</width>
-            <height>1</height>
-            <texture border="70">shadow.png</texture>
-        </control>
-        <control type="image" id="1014">
-            <left>0</left>
-            <top>0</top>
-            <width>1</width>
-            <height>1</height>
-            <texture border="70">shadow.png</texture>
-        </control>
-        <control type="image" id="1004">
-            <left>0</left>
-            <top>0</top>
-            <width>1</width>
-            <height>1</height>
-            <texture>white.png</texture>
-        </control>
-        <control type="image" id="1005">
-            <left>0</left>
-            <top>0</top>
-            <width>1920</width>
-            <height>1080</height>
-            <aspectratio>stretch</aspectratio>
-            <texture/>
+        <control type="group" id="1101">
             <visible>String.IsEqual(Window.Property(JJSPhotoLayer),A)+String.IsEqual(Window.Property(JJSProjectorActive),0)</visible>
             <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
                 <effect type="fade" start="0" end="100" time="120" tween="sine" easing="inout"/>
@@ -173,14 +139,44 @@
                 <effect type="fade" start="15" end="100" time="1500" tween="sine" easing="inout"/>
                 <effect type="slide" start="-140,0" end="0,0" time="1500" tween="quadratic" easing="out"/>
             </animation>
+            <control type="image" id="1003">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1013">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1014">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1004">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture>white.png</texture>
+            </control>
+            <control type="image" id="1005">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <aspectratio>stretch</aspectratio>
+                <texture/>
+            </control>
         </control>
-        <control type="image" id="1007">
-            <left>0</left>
-            <top>0</top>
-            <width>1920</width>
-            <height>1080</height>
-            <aspectratio>stretch</aspectratio>
-            <texture/>
+        <control type="group" id="1102">
             <visible>String.IsEqual(Window.Property(JJSPhotoLayer),B)+String.IsEqual(Window.Property(JJSProjectorActive),0)</visible>
             <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
                 <effect type="fade" start="0" end="100" time="120" tween="sine" easing="inout"/>
@@ -302,14 +298,44 @@
                 <effect type="fade" start="15" end="100" time="1500" tween="sine" easing="inout"/>
                 <effect type="slide" start="-140,0" end="0,0" time="1500" tween="quadratic" easing="out"/>
             </animation>
+            <control type="image" id="1015">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1016">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1017">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1018">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture>white.png</texture>
+            </control>
+            <control type="image" id="1007">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <aspectratio>stretch</aspectratio>
+                <texture/>
+            </control>
         </control>
-        <control type="image" id="1008">
-            <left>0</left>
-            <top>0</top>
-            <width>1920</width>
-            <height>1080</height>
-            <aspectratio>stretch</aspectratio>
-            <texture/>
+        <control type="group" id="1103">
             <visible>String.IsEqual(Window.Property(JJSProjectorActive),1)</visible>
             <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
                 <effect type="slide" start="1920,0" end="0,0" time="120" tween="sine" easing="inout"/>
@@ -359,14 +385,44 @@
             <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
                 <effect type="slide" start="-1920,0" end="0,0" time="1500" tween="sine" easing="inout"/>
             </animation>
+            <control type="image" id="1019">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1020">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1021">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1022">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture>white.png</texture>
+            </control>
+            <control type="image" id="1008">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <aspectratio>stretch</aspectratio>
+                <texture/>
+            </control>
         </control>
-        <control type="image" id="1009">
-            <left>0</left>
-            <top>0</top>
-            <width>1920</width>
-            <height>1080</height>
-            <aspectratio>stretch</aspectratio>
-            <texture/>
+        <control type="group" id="1104">
             <visible>String.IsEqual(Window.Property(JJSProjectorActive),1)</visible>
             <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),next)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
                 <effect type="slide" start="1920,0" end="0,0" time="120" tween="sine" easing="inout"/>
@@ -416,6 +472,42 @@
             <animation type="Visible" condition="String.IsEqual(Window.Property(JJSTransitionMode),projector)+String.IsEqual(Window.Property(JJSTransitionDir),prev)+String.IsEqual(Window.Property(JJSTransitionMs),1500)" reversible="false">
                 <effect type="slide" start="-1920,0" end="0,0" time="1500" tween="sine" easing="inout"/>
             </animation>
+            <control type="image" id="1023">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1024">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1025">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture border="70">shadow.png</texture>
+            </control>
+            <control type="image" id="1026">
+                <left>0</left>
+                <top>0</top>
+                <width>1</width>
+                <height>1</height>
+                <texture>white.png</texture>
+            </control>
+            <control type="image" id="1009">
+                <left>0</left>
+                <top>0</top>
+                <width>1920</width>
+                <height>1080</height>
+                <aspectratio>stretch</aspectratio>
+                <texture/>
+            </control>
         </control>
         <control type="image" id="1010">
             <left>32</left>
