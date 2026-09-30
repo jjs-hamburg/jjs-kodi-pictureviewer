@@ -1,0 +1,50 @@
+name: "Build Picture Viewer diagnostic ZIP"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - diag-0.1.60
+    paths:
+      - "script.jjs.pictureviewer/**"
+      - ".github/workflows/build-diag.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate and build diagnostic ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile script.jjs.pictureviewer/default.py script.jjs.pictureviewer/resources/lib/viewer.py
+          VERSION="$(python - <<'PY'
+          import xml.etree.ElementTree as ET
+          print(ET.parse("script.jjs.pictureviewer/addon.xml").getroot().attrib["version"])
+          PY
+          )"
+          ZIP="script.jjs.pictureviewer-${VERSION}.zip"
+          rm -rf script.jjs.pictureviewer/__pycache__ script.jjs.pictureviewer/resources/lib/__pycache__
+          zip -qr "$ZIP" script.jjs.pictureviewer -x "*/__pycache__/*" "*.pyc"
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+
+      - name: Upload diagnostic artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: script.jjs.pictureviewer-0.1.60.Diag001
+          path: ${{ env.ZIP }}
+          if-no-files-found: error
+          retention-days: 14

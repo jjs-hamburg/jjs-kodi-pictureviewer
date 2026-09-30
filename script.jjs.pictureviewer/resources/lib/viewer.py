@@ -196,6 +196,10 @@ BTN_TRANSITION_DURATION = 9116
 CANVAS_W = 1920
 CANVAS_H = 1080
 
+# Diagnostic renderer: Kodi receives the original source image directly.
+# Pillow/temp-file compositing is bypassed; border and shadow are native controls.
+DIAG_DIRECT_RENDERER = True
+
 DEFAULTS = {
     'settings_version': 13,
     'display_mode': 'gallery',
@@ -1069,6 +1073,84 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.frame_img.setVisible(False)
         self.shadow_img.setVisible(False)
 
+    def _display_direct_source(self, index):
+        """Display the original source image with native Kodi frame/shadow controls."""
+        name, path = self.images[index]
+        self._apply_background()
+
+        dims = self._dimensions(path)
+        if not dims:
+            dims = (CANVAS_W, CANVAS_H)
+
+        if self.settings['display_mode'] == 'fullscreen':
+            border = 0
+            max_w = CANVAS_W
+            max_h = CANVAS_H
+            shadow_width = 0
+            shadow_offset = 0
+        else:
+            pct = max(50, min(98, int(self.settings['gallery_percent']))) / 100.0
+            outer_w = int(CANVAS_W * pct)
+            outer_h = int(CANVAS_H * pct)
+            border = max(0, int(self.settings['border_width'])) if self.settings['white_border'] else 0
+            max_w = max(1, outer_w - 2 * border)
+            max_h = max(1, outer_h - 2 * border)
+            shadow_width = max(0, int(self.settings['shadow_width'])) if self.settings['shadow'] else 0
+            shadow_offset = int(self.settings['shadow_offset']) if self.settings['shadow'] else 0
+
+        img_w, img_h = fit_rect(dims[0], dims[1], max_w, max_h)
+        frame_w = img_w + 2 * border
+        frame_h = img_h + 2 * border
+        frame_x = (CANVAS_W - frame_w) // 2
+        frame_y = (CANVAS_H - frame_h) // 2
+        img_x = frame_x + border
+        img_y = frame_y + border
+
+        self.setProperty('JJSProjectorActive', '0')
+        self.setProperty('JJSTransitionMode', 'none')
+        self.setProperty('JJSPhotoLayer', 'A')
+        self.active_photo_layer = 'A'
+        self.pending_projector_layer = ''
+        self.transition_until = 0.0
+
+        self.photo_b.setImage('')
+        self.projector_ghost_a.setImage('')
+        self.projector_ghost_b.setImage('')
+
+        self.photo_a.setPosition(img_x, img_y)
+        self.photo_a.setWidth(img_w)
+        self.photo_a.setHeight(img_h)
+        self.photo_a.setImage(path, useCache=False)
+
+        if self.settings['display_mode'] == 'gallery' and border > 0:
+            self.frame_img.setPosition(frame_x, frame_y)
+            self.frame_img.setWidth(frame_w)
+            self.frame_img.setHeight(frame_h)
+            self.frame_img.setVisible(True)
+        else:
+            self.frame_img.setVisible(False)
+
+        if (self.settings['display_mode'] == 'gallery' and self.settings['shadow']
+                and shadow_width > 0):
+            shadow_w = frame_w + 2 * shadow_width
+            shadow_h = frame_h + 2 * shadow_width
+            self.shadow_img.setPosition(frame_x - shadow_width + shadow_offset,
+                                        frame_y - shadow_width + shadow_offset)
+            self.shadow_img.setWidth(shadow_w)
+            self.shadow_img.setHeight(shadow_h)
+            try:
+                alpha = max(0, min(255, int(255 * int(self.settings['shadow_opacity']) / 100.0)))
+                self.shadow_img.setColorDiffuse('0x%02XFFFFFF' % alpha)
+            except Exception:
+                pass
+            self.shadow_img.setVisible(True)
+        else:
+            self.shadow_img.setVisible(False)
+
+        self.status.setLabel('%d / %d   %s' % (index + 1, len(self.images), name))
+        self.last_change = time.monotonic()
+        return True
+
     def _transition_mode(self):
         mode = str(self.settings.get('transition_mode', 'fade') or 'fade')
         return mode if mode in ('none', 'fade', 'zoom', 'slide', 'projector') else 'fade'
@@ -1240,6 +1322,15 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             return False
         target = self.index
 
+        if DIAG_DIRECT_RENDERER:
+            try:
+                return self._display_direct_source(target)
+            except Exception as exc:
+                self._mark_bad_image(target, repr(exc))
+                _log('Direct diagnostic display failed %s: %r' % (self.images[target][1], exc),
+                     xbmc.LOGERROR)
+                return False
+
         cached = self._take_prefetch(target)
         if cached:
             self._display_rendered(target, cached['path'], cached['slot'], animate=animate, direction=direction)
@@ -1268,6 +1359,8 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         return True
 
     def _kick_prefetch(self):
+        if DIAG_DIRECT_RENDERER:
+            return
         if self.closing or not self.images or len(self.images) < 2:
             return
         if self.prefetch_disabled_session:
