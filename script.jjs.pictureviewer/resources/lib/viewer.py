@@ -1097,17 +1097,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         duration_ms = self._transition_duration_ms()
 
         # Preload the future persistent layer while it is still hidden.
-        _log('DIAG setImage start: rendered=%s target_layer=%s active_layer=%s mode=%s current_render=%s' %
-             (rendered, target_layer, self.active_photo_layer, mode, self.current_render_path))
         target.setImage(rendered, useCache=False)
-        try:
-            _log('DIAG after setImage: target_visible=%s JJSPhotoLayer=%s JJSProjectorActive=%s JJSTransitionMode=%s' %
-                 (target.isVisible(),
-                  self.getProperty('JJSPhotoLayer'),
-                  self.getProperty('JJSProjectorActive'),
-                  self.getProperty('JJSTransitionMode')))
-        except Exception as exc:
-            _log('DIAG visibility/property read failed after setImage: %r' % (exc,), xbmc.LOGWARNING)
 
         if mode == 'projector' and self.current_render_path:
             # 1008 is the outgoing overlay, 1009 the incoming overlay.  Keep the
@@ -1144,19 +1134,6 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                 self.setProperty('JJSPhotoLayer', target_layer)
                 self.active_photo_layer = target_layer
 
-            try:
-                _log('DIAG after visibility switch: target_layer=%s active_layer=%s target_visible=%s JJSPhotoLayer=%s JJSProjectorActive=%s JJSTransitionMode=%s JJSTransitionDir=%s JJSTransitionMs=%s' %
-                     (target_layer,
-                      self.active_photo_layer,
-                      target.isVisible(),
-                      self.getProperty('JJSPhotoLayer'),
-                      self.getProperty('JJSProjectorActive'),
-                      self.getProperty('JJSTransitionMode'),
-                      self.getProperty('JJSTransitionDir'),
-                      self.getProperty('JJSTransitionMs')))
-            except Exception as exc:
-                _log('DIAG visibility/property read failed after switch: %r' % (exc,), xbmc.LOGWARNING)
-
             self.transition_until = time.monotonic() + ((duration_ms + 45) / 1000.0 if mode != 'none' else 0.0)
 
     def _allocate_slot(self):
@@ -1169,8 +1146,6 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
 
     def _display_rendered(self, index, rendered, slot, animate=True, direction=1):
         name, _path = self.images[index]
-        _log('DIAG display: index=%d name=%s rendered=%s slot=%s animate=%s direction=%s' %
-             (index, name, rendered, slot, animate, direction))
         self._apply_background()
         self._layout_current()
         self._switch_photo_layer(rendered, animate=animate, direction=direction)
