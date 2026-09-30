@@ -24,6 +24,20 @@
             <height>1</height>
             <texture border="70">shadow.png</texture>
         </control>
+        <control type="image" id="1013">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <texture border="70">shadow.png</texture>
+        </control>
+        <control type="image" id="1014">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <texture border="70">shadow.png</texture>
+        </control>
         <control type="image" id="1004">
             <left>0</left>
             <top>0</top>

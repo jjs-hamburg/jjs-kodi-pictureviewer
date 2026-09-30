@@ -169,6 +169,8 @@ PICTURE_VIEW_IDS = (50, 51, 550, 551, 500, 514, 510)
 CTRL_BG_BLACK = 1001
 CTRL_BG_IMAGE = 1002
 CTRL_SHADOW = 1003
+CTRL_SHADOW_2 = 1013
+CTRL_SHADOW_3 = 1014
 CTRL_FRAME = 1004
 CTRL_PHOTO_A = 1005
 CTRL_STATUS = 1006
@@ -925,6 +927,8 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.previous_slot = None
         self.current_render_path = ''
         self.previous_render_path = ''
+        self.direct_current_path = ''
+        self.direct_current_geometry = None
         self.render_serial = 0
         self.prefetch = None
         self.prefetch_inflight = None
@@ -963,6 +967,8 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.bg_black = self.getControl(CTRL_BG_BLACK)
         self.bg_image = self.getControl(CTRL_BG_IMAGE)
         self.shadow_img = self.getControl(CTRL_SHADOW)
+        self.shadow_img_2 = self.getControl(CTRL_SHADOW_2)
+        self.shadow_img_3 = self.getControl(CTRL_SHADOW_3)
         self.frame_img = self.getControl(CTRL_FRAME)
         self.photo_a = self.getControl(CTRL_PHOTO_A)
         self.photo_b = self.getControl(CTRL_PHOTO_B)
@@ -1073,14 +1079,19 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.frame_img.setVisible(False)
         self.shadow_img.setVisible(False)
 
-    def _display_direct_source(self, index):
-        """Display the original source image with native Kodi frame/shadow controls."""
+    def _set_direct_geometry(self, control, geometry, path):
+        x, y, width, height = geometry
+        control.setPosition(x, y)
+        control.setWidth(width)
+        control.setHeight(height)
+        control.setImage(path, useCache=False)
+
+    def _display_direct_source(self, index, animate=True, direction=1):
+        """Display the original source image; frame/shadow stay native Kodi controls."""
         name, path = self.images[index]
         self._apply_background()
 
-        dims = self._dimensions(path)
-        if not dims:
-            dims = (CANVAS_W, CANVAS_H)
+        dims = self._dimensions(path) or (CANVAS_W, CANVAS_H)
 
         if self.settings['display_mode'] == 'fullscreen':
             border = 0
@@ -1105,23 +1116,9 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         frame_y = (CANVAS_H - frame_h) // 2
         img_x = frame_x + border
         img_y = frame_y + border
+        geometry = (img_x, img_y, img_w, img_h)
 
-        self.setProperty('JJSProjectorActive', '0')
-        self.setProperty('JJSTransitionMode', 'none')
-        self.setProperty('JJSPhotoLayer', 'A')
-        self.active_photo_layer = 'A'
-        self.pending_projector_layer = ''
-        self.transition_until = 0.0
-
-        self.photo_b.setImage('')
-        self.projector_ghost_a.setImage('')
-        self.projector_ghost_b.setImage('')
-
-        self.photo_a.setPosition(img_x, img_y)
-        self.photo_a.setWidth(img_w)
-        self.photo_a.setHeight(img_h)
-        self.photo_a.setImage(path, useCache=False)
-
+        # Native frame.
         if self.settings['display_mode'] == 'gallery' and border > 0:
             self.frame_img.setPosition(frame_x, frame_y)
             self.frame_img.setWidth(frame_w)
@@ -1130,21 +1127,75 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         else:
             self.frame_img.setVisible(False)
 
+        # Native shadow. Three identical layers reproduce the stronger alpha scale
+        # that the old Pillow renderer applied to the soft source shadow texture.
+        shadow_controls = (self.shadow_img, self.shadow_img_2, self.shadow_img_3)
         if (self.settings['display_mode'] == 'gallery' and self.settings['shadow']
                 and shadow_width > 0):
             shadow_w = frame_w + 2 * shadow_width
             shadow_h = frame_h + 2 * shadow_width
-            self.shadow_img.setPosition(frame_x - shadow_width + shadow_offset,
-                                        frame_y - shadow_width + shadow_offset)
-            self.shadow_img.setWidth(shadow_w)
-            self.shadow_img.setHeight(shadow_h)
-            # Explicitly bind the add-on shadow texture. The XML-relative texture
-            # was not visible on the first direct-renderer test on LibreELEC x86.
-            self.shadow_img.setImage(SHADOW_TEXTURE, useCache=False)
-            self.shadow_img.setVisible(True)
+            sx = frame_x - shadow_width + shadow_offset
+            sy = frame_y - shadow_width + shadow_offset
+            strength = max(0, min(100, int(self.settings['shadow_opacity'])))
+            alpha = max(0, min(255, int(round(255.0 * strength / 100.0))))
+            diffuse = '0x%02XFFFFFF' % alpha
+            for shadow in shadow_controls:
+                shadow.setPosition(sx, sy)
+                shadow.setWidth(shadow_w)
+                shadow.setHeight(shadow_h)
+                shadow.setImage(SHADOW_TEXTURE, useCache=False)
+                try:
+                    shadow.setColorDiffuse(diffuse)
+                except Exception:
+                    pass
+                shadow.setVisible(strength > 0)
         else:
-            self.shadow_img.setVisible(False)
+            for shadow in shadow_controls:
+                shadow.setVisible(False)
 
+        target_layer = 'A' if self.active_photo_layer != 'A' else 'B'
+        target = self.photo_a if target_layer == 'A' else self.photo_b
+        mode = self._transition_mode() if animate and self.active_photo_layer else 'none'
+        duration_ms = self._transition_duration_ms()
+
+        self._set_direct_geometry(target, geometry, path)
+
+        if mode == 'projector' and self.direct_current_path and self.direct_current_geometry:
+            ox, oy, ow, oh = self.direct_current_geometry
+            nx, ny, nw, nh = geometry
+            outgoing_base_x = ox - CANVAS_W if direction >= 0 else ox + CANVAS_W
+            self.projector_ghost_a.setPosition(outgoing_base_x, oy)
+            self.projector_ghost_a.setWidth(ow)
+            self.projector_ghost_a.setHeight(oh)
+            self.projector_ghost_a.setImage(self.direct_current_path, useCache=False)
+            self.projector_ghost_b.setPosition(nx, ny)
+            self.projector_ghost_b.setWidth(nw)
+            self.projector_ghost_b.setHeight(nh)
+            self.projector_ghost_b.setImage(path, useCache=False)
+
+        with self.transition_lock:
+            self.transition_serial += 1
+            self.transition_settle_queued_serial = 0
+            self.transition_settle_queued_at = 0.0
+            self.setProperty('JJSTransitionDir', 'next' if direction >= 0 else 'prev')
+            self.setProperty('JJSTransitionMs', str(duration_ms))
+
+            if mode == 'projector' and self.direct_current_path and self.direct_current_geometry:
+                self.pending_projector_layer = target_layer
+                self.setProperty('JJSTransitionMode', 'projector')
+                self.setProperty('JJSProjectorActive', '1')
+            else:
+                self.pending_projector_layer = ''
+                self.setProperty('JJSProjectorActive', '0')
+                self.setProperty('JJSTransitionMode', mode)
+                self.setProperty('JJSPhotoLayer', target_layer)
+                self.active_photo_layer = target_layer
+
+            self.transition_until = time.monotonic() + (
+                (duration_ms + 45) / 1000.0 if mode != 'none' else 0.0)
+
+        self.direct_current_path = path
+        self.direct_current_geometry = geometry
         self.status.setLabel('%d / %d   %s' % (index + 1, len(self.images), name))
         self.last_change = time.monotonic()
         return True
@@ -1322,7 +1373,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
 
         if DIAG_DIRECT_RENDERER:
             try:
-                return self._display_direct_source(target)
+                return self._display_direct_source(target, animate=animate, direction=direction)
             except Exception as exc:
                 self._mark_bad_image(target, repr(exc))
                 _log('Direct diagnostic display failed %s: %r' % (self.images[target][1], exc),
