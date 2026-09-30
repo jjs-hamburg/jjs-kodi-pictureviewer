@@ -1138,11 +1138,9 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
                                         frame_y - shadow_width + shadow_offset)
             self.shadow_img.setWidth(shadow_w)
             self.shadow_img.setHeight(shadow_h)
-            try:
-                alpha = max(0, min(255, int(255 * int(self.settings['shadow_opacity']) / 100.0)))
-                self.shadow_img.setColorDiffuse('0x%02XFFFFFF' % alpha)
-            except Exception:
-                pass
+            # Explicitly bind the add-on shadow texture. The XML-relative texture
+            # was not visible on the first direct-renderer test on LibreELEC x86.
+            self.shadow_img.setImage(SHADOW_TEXTURE, useCache=False)
             self.shadow_img.setVisible(True)
         else:
             self.shadow_img.setVisible(False)

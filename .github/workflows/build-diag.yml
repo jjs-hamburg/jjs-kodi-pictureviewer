@@ -1,4 +1,4 @@
-name: "Build Picture Viewer diagnostic ZIP"
+name: "Build Picture Viewer diagnostic draft release"
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
       - ".github/workflows/build-diag.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -39,12 +39,19 @@ jobs:
           ZIP="script.jjs.pictureviewer-${VERSION}.zip"
           rm -rf script.jjs.pictureviewer/__pycache__ script.jjs.pictureviewer/resources/lib/__pycache__
           zip -qr "$ZIP" script.jjs.pictureviewer -x "*/__pycache__/*" "*.pyc"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "ZIP=$ZIP" >> "$GITHUB_ENV"
 
-      - name: Upload diagnostic artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: script.jjs.pictureviewer-0.1.60.Diag001
-          path: ${{ env.ZIP }}
-          if-no-files-found: error
-          retention-days: 14
+      - name: Create private diagnostic draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="diag-${VERSION}"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" "$ZIP" \
+            --target "${GITHUB_SHA}" \
+            --title "JJS Kodi Picture Viewer ${VERSION}" \
+            --notes "Diagnostic build. Not a public release." \
+            --draft
