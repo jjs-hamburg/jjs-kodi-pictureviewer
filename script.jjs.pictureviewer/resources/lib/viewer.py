@@ -189,6 +189,7 @@ CTRL_SHADOW_GB = 1023
 CTRL_SHADOW_GB2 = 1024
 CTRL_SHADOW_GB3 = 1025
 CTRL_FRAME_GB = 1026
+CTRL_NATIVE_PRELOAD = 1027
 CTRL_DUMMY_FOCUS = 9900
 
 BTN_MODE = 9101
@@ -998,6 +999,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         self.shadow_gb2 = self.getControl(CTRL_SHADOW_GB2)
         self.shadow_gb3 = self.getControl(CTRL_SHADOW_GB3)
         self.frame_gb = self.getControl(CTRL_FRAME_GB)
+        self.native_preload = self.getControl(CTRL_NATIVE_PRELOAD)
         self.status = self.getControl(CTRL_STATUS)
         self.clearProperty('JJSMenu')
         self.clearProperty('JJSPhotoLayer')
@@ -1109,7 +1111,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         photo.setPosition(x, y)
         photo.setWidth(width)
         photo.setHeight(height)
-        photo.setImage(path, useCache=False)
+        photo.setImage(path, useCache=True)
 
         fx, fy, fw, fh, frame_visible = frame_geometry
         frame.setPosition(fx, fy)
@@ -1130,6 +1132,23 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
             except Exception:
                 pass
             shadow.setVisible(shadow_visible and shadow_strength > 0)
+
+    def _preload_direct_source(self, index, direction=1):
+        """Ask Kodi to decode/cache the next original image before it is animated."""
+        if not self.images or len(self.images) < 2:
+            self.native_preload.setImage('')
+            return
+        candidate = self._next_usable_index(index, 1 if direction >= 0 else -1)
+        if candidate == index:
+            self.native_preload.setImage('')
+            return
+        try:
+            _name, next_path = self.images[candidate]
+            # The 1x1 control is covered by the normal viewer layers but remains
+            # renderable, so Kodi can populate its texture cache ahead of time.
+            self.native_preload.setImage(next_path, useCache=True)
+        except Exception as exc:
+            _log('Native preload failed: %r' % (exc,), xbmc.LOGWARNING)
 
     def _display_direct_source(self, index, animate=True, direction=1):
         """Display original source; photo, border and shadow animate as one visual unit."""
@@ -1221,6 +1240,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         }
         self.status.setLabel('%d / %d   %s' % (index + 1, len(self.images), name))
         self.last_change = time.monotonic()
+        self._preload_direct_source(index, direction)
         return True
 
     def _transition_mode(self):

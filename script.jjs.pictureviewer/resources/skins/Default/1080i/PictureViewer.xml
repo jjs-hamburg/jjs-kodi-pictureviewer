@@ -17,6 +17,14 @@
             <aspectratio>scale</aspectratio>
             <texture background="true"/>
         </control>
+        <control type="image" id="1027">
+            <left>0</left>
+            <top>0</top>
+            <width>1</width>
+            <height>1</height>
+            <aspectratio>keep</aspectratio>
+            <texture/>
+        </control>
         <control type="group" id="1101">
             <visible>String.IsEqual(Window.Property(JJSPhotoLayer),A)+String.IsEqual(Window.Property(JJSProjectorActive),0)</visible>
             <animation type="VisibleChange" condition="String.IsEqual(Window.Property(JJSTransitionMode),fade)+String.IsEqual(Window.Property(JJSTransitionMs),120)" reversible="false">
