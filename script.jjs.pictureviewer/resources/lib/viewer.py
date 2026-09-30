@@ -1148,11 +1148,7 @@ class PictureViewer(xbmcgui.WindowXMLDialog):
         name, _path = self.images[index]
         self._apply_background()
         self._layout_current()
-        # 0.1.59 diagnostic: feed the original source image directly to Kodi's
-        # normal A/B image-control pipeline. The Pillow/render step still runs so
-        # only the texture source handed to setImage() changes.
-        _source_name, source_path = self.images[index]
-        self._switch_photo_layer(source_path, animate=animate, direction=direction)
+        self._switch_photo_layer(rendered, animate=animate, direction=direction)
 
         stale = self.previous_render_path
         self.previous_render_path = self.current_render_path
